@@ -1,0 +1,27 @@
+{
+  "name": "rekt",
+  "version": "1.0.0",
+  "description": "Anonymous no-repository code review.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brianto/rekt.git"
+  },
+  "keywords": [
+    "code",
+    "review",
+    "rekt"
+  ],
+  "author": "Brian To <bxt5647@rit.edu>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/brianto/rekt/issues"
+  },
+  "homepage": "https://github.com/brianto/rekt#README.md",
+  "devDependencies": {
+    "del": "^2.2.2"
+  }
+}
