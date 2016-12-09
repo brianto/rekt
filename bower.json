@@ -18,5 +18,12 @@
     "node_modules",
     "bower_components",
     "test"
-  ]
+  ],
+  "dependencies": {
+    "font-awesome": "fontawesome#^4.7.0",
+    "lodash": "^4.17.2",
+    "prism": "prismjs#^1.6.0",
+    "pure": "purecss#^0.6.0",
+    "zepto": "^1.1.6"
+  }
 }
