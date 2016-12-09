@@ -1,0 +1,22 @@
+{
+  "name": "rekt",
+  "description": "Anonymous no-repository code review.",
+  "main": "index.js",
+  "authors": [
+    "Brian To <bxt5647@rit.edu>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "code",
+    "review",
+    "rekt"
+  ],
+  "homepage": "https://github.com/brianto/rekt",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test"
+  ]
+}
