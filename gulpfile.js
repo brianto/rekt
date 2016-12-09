@@ -3,6 +3,7 @@ const del = require('del');
 const path = require('path');
 
 const bower = require('bower-files')();
+const cleancss = require('gulp-clean-css');
 const concat = require('gulp-concat');
 const handlebars = require('gulp-compile-handlebars');
 const rename = require('gulp-rename');
@@ -26,8 +27,20 @@ gulp.task('bower:js', function() {
   ;
 });
 
+gulp.task('bower:css', function() {
+  return gulp
+  .src(bower.ext('css').files)
+  .pipe(sourcemaps.init())
+  .pipe(cleancss())
+  .pipe(concat('vendor.min.css'))
+  .pipe(sourcemaps.write('.'))
+  .pipe(gulp.dest(path.join(BUILD_DIR, 'css')))
+  ;
+});
+
 gulp.task('bower', [
   'bower:js',
+  'bower:css',
 ]);
 
 gulp.task('build', function() {
