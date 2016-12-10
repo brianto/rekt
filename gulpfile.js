@@ -10,9 +10,6 @@ const bower = require('bower-files')({
         'fonts/*',
       ],
     },
-    pure: {
-      main: 'src/**/*.css',
-    },
     lodash: {
       main: 'lodash.js',
     },
@@ -28,6 +25,7 @@ const uglify = require('gulp-uglify');
 const webserver = require('gulp-webserver');
 
 const BUILD_DIR = 'build';
+const APP_DIR = 'app';
 
 gulp.task('clean', function() {
   return del([ 'build' ]);
@@ -68,9 +66,9 @@ gulp.task('bower', [
   'bower:fonts',
 ]);
 
-gulp.task('build', function() {
+gulp.task('app:html', function() {
   return gulp
-  .src('app/*.hbs')
+  .src('app/*.html.hbs')
   .pipe(handlebars())
   .pipe(rename(function(path) {
     path.extname = '';
@@ -79,8 +77,30 @@ gulp.task('build', function() {
   ;
 });
 
-gulp.task('server', [ 'build' ], function() {
-  gulp.watch('app/**/*', [ 'build' ]);
+gulp.task('app:js:main', function() {
+  return gulp
+  .src(path.join(APP_DIR, '*.js'))
+  .pipe(sourcemaps.init())
+  .pipe(uglify())
+  .pipe(sourcemaps.write('.'))
+  .pipe(gulp.dest(path.join(BUILD_DIR, 'js')))
+  ;
+});
+
+gulp.task('app:js:lib', function() {
+  // TODO
+});
+
+gulp.task('app', [
+  'app:html',
+  'app:js:main',
+  'app:js:lib',
+]);
+
+gulp.task('server', function() {
+  gulp.watch(path.join(APP_DIR, '*.html.hbs'), [ 'app:html' ]);
+  gulp.watch(path.join(APP_DIR, '*.js'), [ 'app:js:main' ]);
+  gulp.watch(path.join(APP_DIR, 'lib', '**', '*.js'), [ 'app:js:lib' ]);
 
   return gulp
   .src(BUILD_DIR)
@@ -90,4 +110,4 @@ gulp.task('server', [ 'build' ], function() {
   ;
 });
 
-gulp.task('default', [ 'bower', 'build' ]);
+gulp.task('default', [ 'bower', 'app' ]);
