@@ -33,11 +33,11 @@ const config = {
 const BUILD_DIR = 'build';
 const APP_DIR = 'app';
 
-gulp.task('clean', function() {
+gulp.task('clean', () => {
   return del([ 'build' ]);
 });
 
-gulp.task('bower:js', function() {
+gulp.task('bower:js', () => {
   return gulp
   .src(bower.ext('js').files)
   .pipe(sourcemaps.init())
@@ -48,7 +48,7 @@ gulp.task('bower:js', function() {
   ;
 });
 
-gulp.task('bower:css', function() {
+gulp.task('bower:css', () => {
   return gulp
   .src(bower.ext('css').files)
   .pipe(sourcemaps.init())
@@ -59,7 +59,7 @@ gulp.task('bower:css', function() {
   ;
 });
 
-gulp.task('bower:fonts', function() {
+gulp.task('bower:fonts', () => {
   return gulp
   .src(bower.ext([ 'eot', 'otf', 'svg', 'ttf', 'woff', 'woff2' ]).files)
   .pipe(gulp.dest(path.join(BUILD_DIR, 'fonts')))
@@ -72,7 +72,7 @@ gulp.task('bower', [
   'bower:fonts',
 ]);
 
-gulp.task('app:html', function() {
+gulp.task('app:html', () => {
   return gulp
   .src(path.join(APP_DIR, '*.html.hbs'))
   .pipe(handlebars({
@@ -80,14 +80,12 @@ gulp.task('app:html', function() {
   }, {
     batch: [ path.join(APP_DIR, 'tmpl') ],
   }))
-  .pipe(rename(function(path) {
-    path.extname = '';
-  }))
+  .pipe(rename(path => path.extname = ''))
   .pipe(gulp.dest(BUILD_DIR))
   ;
 });
 
-gulp.task('app:css', function() {
+gulp.task('app:css', () => {
   return gulp
   .src(path.join(APP_DIR, '*.less'))
   .pipe(sourcemaps.init())
@@ -99,7 +97,7 @@ gulp.task('app:css', function() {
   ;
 });
 
-gulp.task('app:js:main', function() {
+gulp.task('app:js:main', () => {
   return gulp
   .src(path.join(APP_DIR, '*.js'))
   .pipe(sourcemaps.init())
@@ -109,7 +107,7 @@ gulp.task('app:js:main', function() {
   ;
 });
 
-gulp.task('app:js:lib', function() {
+gulp.task('app:js:lib', () => {
   // TODO
 });
 
@@ -120,7 +118,7 @@ gulp.task('app', [
   'app:js:lib',
 ]);
 
-gulp.task('server', function() {
+gulp.task('server', () => {
   gulp.watch(path.join(APP_DIR, '**', '*.html.hbs'), [ 'app:html' ]);
   gulp.watch(path.join(APP_DIR, '*.less'), [ 'app:css' ]);
   gulp.watch(path.join(APP_DIR, '*.js'), [ 'app:js:main' ]);
