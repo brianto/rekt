@@ -25,6 +25,7 @@ const handlebars = require('gulp-compile-handlebars');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
+const webserver = require('gulp-webserver');
 
 const BUILD_DIR = 'build';
 
@@ -75,6 +76,17 @@ gulp.task('build', function() {
     path.extname = '';
   }))
   .pipe(gulp.dest(BUILD_DIR))
+  ;
+});
+
+gulp.task('server', [ 'build' ], function() {
+  gulp.watch('app/**/*', [ 'build' ]);
+
+  return gulp
+  .src(BUILD_DIR)
+  .pipe(webserver({
+    livereload: true,
+  }))
   ;
 });
 
