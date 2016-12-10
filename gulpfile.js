@@ -19,6 +19,7 @@ const bower = require('bower-files')({
 const cleancss = require('gulp-clean-css');
 const concat = require('gulp-concat');
 const handlebars = require('gulp-compile-handlebars');
+const htmlmin = require('gulp-htmlmin');
 const less = require('gulp-less');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
@@ -79,6 +80,11 @@ gulp.task('app:html', () => {
     config: config,
   }, {
     batch: [ path.join(APP_DIR, 'tmpl') ],
+  }))
+  .pipe(htmlmin({
+    html5: true,
+    collapseWhitespace: true,
+    removeComments: true,
   }))
   .pipe(rename(path => path.extname = ''))
   .pipe(gulp.dest(BUILD_DIR))
