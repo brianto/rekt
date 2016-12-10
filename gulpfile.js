@@ -2,7 +2,23 @@ const gulp = require('gulp');
 const del = require('del');
 const path = require('path');
 
-const bower = require('bower-files')();
+const bower = require('bower-files')({
+  overrides: {
+    'font-awesome': {
+      main: [
+        'css/font-awesome.css',
+        'fonts/*',
+      ],
+    },
+    pure: {
+      main: 'src/**/*.css',
+    },
+    lodash: {
+      main: 'lodash.js',
+    },
+  },
+});
+
 const cleancss = require('gulp-clean-css');
 const concat = require('gulp-concat');
 const handlebars = require('gulp-compile-handlebars');
@@ -38,9 +54,17 @@ gulp.task('bower:css', function() {
   ;
 });
 
+gulp.task('bower:fonts', function() {
+  return gulp
+  .src(bower.ext([ 'eot', 'otf', 'svg', 'ttf', 'woff', 'woff2' ]).files)
+  .pipe(gulp.dest(path.join(BUILD_DIR, 'fonts')))
+  ;
+})
+
 gulp.task('bower', [
   'bower:js',
   'bower:css',
+  'bower:fonts',
 ]);
 
 gulp.task('build', function() {
