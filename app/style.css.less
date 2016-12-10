@@ -1,3 +1,17 @@
+header {
+  text-align: center;
+
+  h1 {
+    font-size: 12rem;
+    display: inline-block;
+    border-bottom: 1px solid lightgrey;
+  }
+
+  h2 {
+    font-size: 3rem;
+  }
+}
+
 ul.inline {
   list-style-type: none;
   margin: 0;
@@ -12,3 +26,52 @@ ul.inline {
     text-decoration: none;
   }
 }
+
+.vspace {
+  height: 6rem;
+}
+
+.center {
+  text-align: center;
+}
+
+.button.button-master {
+  height: auto;
+  line-height: auto;
+  font-size: 3rem;
+}
+
+.addon {
+  display: flex;
+
+  .shared(@side, @border: 0) {
+    border-@{side}: @border;
+    border-top-@{side}-radius: 0;
+    border-bottom-@{side}-radius: 0;
+  }
+
+  input.field {
+    flex: 1;
+
+    &:not(:first-child) {
+      .shared(left);
+    }
+
+    &:not(:last-child) {
+      .shared(right);
+    }
+  }
+
+  > * {
+    height: 38px; // Match input's styling
+
+    &:not(:first-child) {
+      .shared(left, 1px solid lightgray);
+    }
+
+    &:not(:last-child) {
+      .shared(right, 1px solid lightgray);
+    }
+  }
+}
+

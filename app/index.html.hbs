@@ -7,8 +7,26 @@
   <script data-main="js/index" src="js/vendor.min.js"></script>
 </head>
 <body>
-<div class="container">
-</div>
+<header class="container">
+  <h1 id="banner">{{ config.node.name }}</h1>
+  <h2>{{ config.node.description }}</h2>
+</header>
+
+<div class="vspace"></div>
+
+<form class="container">
+  <div class="row center">
+    <a href="//new.html" class="button button-primary button-master">Create Review</a>
+  </div>
+
+  <div class="vspace"></div>
+
+  <div class="row addon">
+    <input id="search" type="text" class="u-full-width field"></input>
+    <button class="button item"><i class="fa fa-search"></i> Search</button>
+  </div>
+</form>
+
 {{> _footer.html }}
 </body>
 </html>
