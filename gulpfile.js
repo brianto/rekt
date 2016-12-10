@@ -19,10 +19,16 @@ const bower = require('bower-files')({
 const cleancss = require('gulp-clean-css');
 const concat = require('gulp-concat');
 const handlebars = require('gulp-compile-handlebars');
+const less = require('gulp-less');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
 const webserver = require('gulp-webserver');
+
+const config = {
+  node: require('./package.json'),
+  bower: require('./bower.json'),
+};
 
 const BUILD_DIR = 'build';
 const APP_DIR = 'app';
@@ -68,12 +74,28 @@ gulp.task('bower', [
 
 gulp.task('app:html', function() {
   return gulp
-  .src('app/*.html.hbs')
-  .pipe(handlebars())
+  .src(path.join(APP_DIR, '*.html.hbs'))
+  .pipe(handlebars({
+    config: config,
+  }, {
+    batch: [ path.join(APP_DIR, 'tmpl') ],
+  }))
   .pipe(rename(function(path) {
     path.extname = '';
   }))
   .pipe(gulp.dest(BUILD_DIR))
+  ;
+});
+
+gulp.task('app:css', function() {
+  return gulp
+  .src(path.join(APP_DIR, '*.less'))
+  .pipe(sourcemaps.init())
+  .pipe(less())
+  .pipe(cleancss())
+  .pipe(concat('style.min.css'))
+  .pipe(sourcemaps.write('.'))
+  .pipe(gulp.dest(path.join(BUILD_DIR, 'css')))
   ;
 });
 
@@ -93,12 +115,14 @@ gulp.task('app:js:lib', function() {
 
 gulp.task('app', [
   'app:html',
+  'app:css',
   'app:js:main',
   'app:js:lib',
 ]);
 
 gulp.task('server', function() {
-  gulp.watch(path.join(APP_DIR, '*.html.hbs'), [ 'app:html' ]);
+  gulp.watch(path.join(APP_DIR, '**', '*.html.hbs'), [ 'app:html' ]);
+  gulp.watch(path.join(APP_DIR, '*.less'), [ 'app:css' ]);
   gulp.watch(path.join(APP_DIR, '*.js'), [ 'app:js:main' ]);
   gulp.watch(path.join(APP_DIR, 'lib', '**', '*.js'), [ 'app:js:lib' ]);
 
