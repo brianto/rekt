@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+  <title>rekt.review</title>
+  <link rel="stylesheet" href="css/vendor.min.css" />
+  <link rel="stylesheet" href="css/style.min.css" />
+  <script src="js/new.min.js"></script>
+</head>
+<body>
+{{> _hero.html }}
+
+<form class="container">
+  <div class="row">
+
+    <!-- Title -->
+    <div class="six columns">
+      <label for="title">Title</label>
+      <input id="title" name="title" type="text" class="u-full-width" />
+    </div>
+
+    <!-- Submitter -->
+    <div class="six columns">
+      <label for="submitter">Submitter</label>
+      <input id="submitter" name="submitter" type="text" class="u-full-width" />
+    </div>
+
+    <!-- Description -->
+    <div class="twelve columns">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" type="text" class="u-full-width"></textarea>
+    </div>
+
+    <!-- Source URL -->
+    <div class="twelve columns">
+      <label for="source">Source URL</label>
+      <div class="addon">
+        <input id="source" name="source" type="url" class="u-full-width" />
+        <a id="preview" alt="Show Preivew" role="button" class="button">
+          <i class="fa fa-eye"></i> Preview
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div id="review" class="row">
+    <div class="two columns">
+
+      <input id="filter" type="text" placeholder="Filter" class="u-full-width"></input>
+
+      <ul id="files">
+      </ul>
+    </div>
+    <div class="ten columns">
+      <pre id="render"><code></code></pre>
+    </div>
+  </div>
+</form>
+
+{{> _footer.html }}
+</body>
+</html>
