@@ -8,9 +8,11 @@ const concat = require('gulp-concat');
 const handlebars = require('gulp-compile-handlebars');
 const htmlmin = require('gulp-htmlmin');
 const less = require('gulp-less');
+const named = require('vinyl-named');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
+const webpack = require('webpack-stream');
 const webserver = require('gulp-webserver');
 
 const config = {
@@ -23,17 +25,6 @@ const APP_DIR = 'app';
 
 gulp.task('clean', () => {
   return del([ BUILD_DIR ]);
-});
-
-gulp.task('bower:js', () => {
-  return gulp
-  .src(bower.ext('js').files)
-  .pipe(sourcemaps.init())
-  .pipe(uglify())
-  .pipe(concat('vendor.min.js'))
-  .pipe(sourcemaps.write('.'))
-  .pipe(gulp.dest(path.join(BUILD_DIR, 'js')))
-  ;
 });
 
 gulp.task('bower:css', () => {
@@ -55,7 +46,6 @@ gulp.task('bower:fonts', () => {
 })
 
 gulp.task('bower', [
-  'bower:js',
   'bower:css',
   'bower:fonts',
 ]);
@@ -90,32 +80,25 @@ gulp.task('app:css', () => {
   ;
 });
 
-gulp.task('app:js:main', () => {
+gulp.task('app:js', () => {
   return gulp
   .src(path.join(APP_DIR, '*.js'))
-  .pipe(sourcemaps.init())
-  .pipe(uglify())
-  .pipe(sourcemaps.write('.'))
+  .pipe(named())
+  .pipe(webpack(require('./webpack.config.js')))
   .pipe(gulp.dest(path.join(BUILD_DIR, 'js')))
   ;
-});
-
-gulp.task('app:js:lib', () => {
-  // TODO
 });
 
 gulp.task('app', [
   'app:html',
   'app:css',
-  'app:js:main',
-  'app:js:lib',
+  'app:js',
 ]);
 
 gulp.task('server', () => {
   gulp.watch(path.join(APP_DIR, '**', '*.html.hbs'), [ 'app:html' ]);
-  gulp.watch(path.join(APP_DIR, '*.less'), [ 'app:css' ]);
-  gulp.watch(path.join(APP_DIR, '*.js'), [ 'app:js:main' ]);
-  gulp.watch(path.join(APP_DIR, 'lib', '**', '*.js'), [ 'app:js:lib' ]);
+  gulp.watch(path.join(APP_DIR, '**', '*.less'), [ 'app:css' ]);
+  gulp.watch(path.join(APP_DIR, '**', '*.js'), [ 'app:js' ]);
 
   return gulp
   .src(BUILD_DIR)
