@@ -35,7 +35,7 @@ const BUILD_DIR = 'build';
 const APP_DIR = 'app';
 
 gulp.task('clean', () => {
-  return del([ 'build' ]);
+  return del([ BUILD_DIR ]);
 });
 
 gulp.task('bower:js', () => {
