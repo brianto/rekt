@@ -23,7 +23,6 @@
     "font-awesome": "fontawesome#^4.7.0",
     "normalize-css": "^5.0.0",
     "prism": "prismjs#^1.6.0",
-    "requirejs": "^2.3.2",
     "skeleton": "^2.0.4",
     "zepto": "^1.1.6"
   }
