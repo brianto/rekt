@@ -2,20 +2,7 @@ const gulp = require('gulp');
 const del = require('del');
 const path = require('path');
 
-const bower = require('bower-files')({
-  overrides: {
-    'font-awesome': {
-      main: [
-        'css/font-awesome.css',
-        'fonts/*',
-      ],
-    },
-    lodash: {
-      main: 'lodash.js',
-    },
-  },
-});
-
+const bower = require('bower-files')();
 const cleancss = require('gulp-clean-css');
 const concat = require('gulp-concat');
 const handlebars = require('gulp-compile-handlebars');
