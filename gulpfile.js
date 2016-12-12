@@ -17,6 +17,7 @@ const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
 const webpack = require('webpack-stream');
 const webserver = require('gulp-webserver');
+const zip = require('gulp-zip');
 
 const config = {
   node: require('./package.json'),
@@ -92,10 +93,23 @@ gulp.task('app:js', () => {
   ;
 });
 
+gulp.task('app:zip', [
+  'app:html',
+  'app:css',
+  'app:js',
+], () => {
+  return gulp
+  .src(path.join(DIST_DIR, 'app', '*'))
+  .pipe(zip('app.zip'))
+  .pipe(gulp.dest(DIST_DIR))
+  ;
+});
+
 gulp.task('app', [
   'app:html',
   'app:css',
   'app:js',
+  'app:zip',
 ]);
 
 gulp.task('default', [ 'bower', 'app' ]);
@@ -108,7 +122,15 @@ gulp.task('doc:generate', () => {
   ;
 });
 
-gulp.task('doc', [ 'doc:generate' ]);
+gulp.task('doc:zip', [ 'doc:generate' ], () => {
+  return gulp
+  .src(path.join(DIST_DIR, 'docs', '*'))
+  .pipe(zip('docs.zip'))
+  .pipe(gulp.dest(DIST_DIR))
+  ;
+});
+
+gulp.task('doc', [ 'doc:generate', 'doc:zip' ]);
 
 gulp.task('server:app', () => {
   gulp.watch(path.join(SRC_DIR, '**', '*.html.hbs'), [ 'app:html' ]);
