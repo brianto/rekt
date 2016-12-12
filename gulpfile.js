@@ -22,11 +22,11 @@ const config = {
   bower: require('./bower.json'),
 };
 
-const BUILD_DIR = 'build';
-const APP_DIR = 'app';
+const DIST_DIR = 'dist'
+const SRC_DIR = 'app';
 
 gulp.task('clean', () => {
-  return del([ BUILD_DIR ]);
+  return del([ DIST_DIR ]);
 });
 
 gulp.task('bower:css', () => {
@@ -36,14 +36,14 @@ gulp.task('bower:css', () => {
   .pipe(cleancss())
   .pipe(concat('vendor.min.css'))
   .pipe(sourcemaps.write('.'))
-  .pipe(gulp.dest(path.join(BUILD_DIR, 'css')))
+  .pipe(gulp.dest(path.join(DIST_DIR, 'app', 'css')))
   ;
 });
 
 gulp.task('bower:fonts', () => {
   return gulp
   .src(bower.ext([ 'eot', 'otf', 'svg', 'ttf', 'woff', 'woff2' ]).files)
-  .pipe(gulp.dest(path.join(BUILD_DIR, 'fonts')))
+  .pipe(gulp.dest(path.join(DIST_DIR, 'app', 'fonts')))
   ;
 })
 
@@ -54,11 +54,11 @@ gulp.task('bower', [
 
 gulp.task('app:html', () => {
   return gulp
-  .src(path.join(APP_DIR, '*.html.hbs'))
+  .src(path.join(SRC_DIR, '*.html.hbs'))
   .pipe(handlebars({
     config: config,
   }, {
-    batch: [ path.join(APP_DIR, 'tmpl') ],
+    batch: [ path.join(SRC_DIR, 'tmpl') ],
   }))
   .pipe(htmlmin({
     html5: true,
@@ -66,28 +66,28 @@ gulp.task('app:html', () => {
     removeComments: true,
   }))
   .pipe(rename(path => path.extname = ''))
-  .pipe(gulp.dest(BUILD_DIR))
+  .pipe(gulp.dest(path.join(DIST_DIR, 'app')))
   ;
 });
 
 gulp.task('app:css', () => {
   return gulp
-  .src(path.join(APP_DIR, '*.less'))
+  .src(path.join(SRC_DIR, '*.less'))
   .pipe(sourcemaps.init())
   .pipe(less())
   .pipe(cleancss())
   .pipe(concat('style.min.css'))
   .pipe(sourcemaps.write('.'))
-  .pipe(gulp.dest(path.join(BUILD_DIR, 'css')))
+  .pipe(gulp.dest(path.join(DIST_DIR, 'app', 'css')))
   ;
 });
 
 gulp.task('app:js', () => {
   return gulp
-  .src(path.join(APP_DIR, '*.js'))
+  .src(path.join(SRC_DIR, '*.js'))
   .pipe(named())
   .pipe(webpack(require('./webpack.config.js')))
-  .pipe(gulp.dest(path.join(BUILD_DIR, 'js')))
+  .pipe(gulp.dest(path.join(DIST_DIR, 'app', 'js')))
   ;
 });
 
@@ -98,12 +98,12 @@ gulp.task('app', [
 ]);
 
 gulp.task('server', () => {
-  gulp.watch(path.join(APP_DIR, '**', '*.html.hbs'), [ 'app:html' ]);
-  gulp.watch(path.join(APP_DIR, '**', '*.less'), [ 'app:css' ]);
-  gulp.watch(path.join(APP_DIR, '**', '*.js'), [ 'app:js' ]);
+  gulp.watch(path.join(SRC_DIR, '**', '*.html.hbs'), [ 'app:html' ]);
+  gulp.watch(path.join(SRC_DIR, '**', '*.less'), [ 'app:css' ]);
+  gulp.watch(path.join(SRC_DIR, '**', '*.js'), [ 'app:js' ]);
 
   return gulp
-  .src(BUILD_DIR)
+  .src(path.join(DIST_DIR, 'app'))
   .pipe(webserver({
     livereload: true,
   }))
