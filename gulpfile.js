@@ -5,6 +5,7 @@ const path = require('path');
 const bower = require('bower-files')();
 const cleancss = require('gulp-clean-css');
 const concat = require('gulp-concat');
+const documentation = require('gulp-documentation');
 const dynamo = require('dynamodb-local');
 const handlebars = require('gulp-compile-handlebars');
 const htmlmin = require('gulp-htmlmin');
@@ -97,7 +98,19 @@ gulp.task('app', [
   'app:js',
 ]);
 
-gulp.task('server', () => {
+gulp.task('default', [ 'bower', 'app' ]);
+
+gulp.task('doc:generate', () => {
+  return gulp
+  .src(path.join(SRC_DIR, '**', '*.js'))
+  .pipe(documentation('html'))
+  .pipe(gulp.dest(path.join(DIST_DIR, 'docs')))
+  ;
+});
+
+gulp.task('doc', [ 'doc:generate' ]);
+
+gulp.task('server:app', () => {
   gulp.watch(path.join(SRC_DIR, '**', '*.html.hbs'), [ 'app:html' ]);
   gulp.watch(path.join(SRC_DIR, '**', '*.less'), [ 'app:css' ]);
   gulp.watch(path.join(SRC_DIR, '**', '*.js'), [ 'app:js' ]);
@@ -106,11 +119,21 @@ gulp.task('server', () => {
   .src(path.join(DIST_DIR, 'app'))
   .pipe(webserver({
     livereload: true,
+    open: true,
   }))
   ;
 });
 
-gulp.task('default', [ 'bower', 'app' ]);
+gulp.task('server:doc', () => {
+  gulp.watch(path.join(SRC_DIR, '**', '*.js'), [ 'doc:generate' ]);
+
+  return gulp
+  .src(path.join(DIST_DIR, 'docs'))
+  .pipe(webserver({ open: true }))
+  ;
+});
+
+gulp.task('server', [ 'server:app' ]);
 
 gulp.task('dynamodb', () => {
   const PORT = 4567;
