@@ -5,10 +5,12 @@ const path = require('path');
 const bower = require('bower-files')();
 const cleancss = require('gulp-clean-css');
 const concat = require('gulp-concat');
+const dynamo = require('dynamodb-local');
 const handlebars = require('gulp-compile-handlebars');
 const htmlmin = require('gulp-htmlmin');
 const less = require('gulp-less');
 const named = require('vinyl-named');
+const open = require('open');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
@@ -109,3 +111,13 @@ gulp.task('server', () => {
 });
 
 gulp.task('default', [ 'bower', 'app' ]);
+
+gulp.task('dynamodb', () => {
+  const PORT = 4567;
+
+  dynamo.launch(PORT, null, [ '-sharedDb' ]);
+
+  // Launch resolving the promise doesn't guarantee the local dynamodb service
+  // will be running. 1s wait is close enough.
+  setTimeout(() => open(`http://localhost:${PORT}/shell`), 1000);
+});
