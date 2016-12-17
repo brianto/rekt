@@ -46,9 +46,10 @@ module.exports = config => {
     },
 
     coverageReporter: {
+      dir: 'dist',
+      subdir: 'unit-coverage',
       reporters: [
-        { type: 'text' },
-        { type: 'html', dir: 'dist', subdir: 'unit-coverage' },
+        { type: 'text', file: 'coverage.txt' },
       ],
     },
 
