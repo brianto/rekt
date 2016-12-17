@@ -23,6 +23,7 @@ module.exports = config => {
     frameworks: [
       'mocha',
       'chai',
+      'sinon',
     ],
 
     reporters: [
