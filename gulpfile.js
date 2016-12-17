@@ -9,6 +9,7 @@ const documentation = require('gulp-documentation');
 const dynamo = require('dynamodb-local');
 const handlebars = require('gulp-compile-handlebars');
 const htmlmin = require('gulp-htmlmin');
+const karma = require('karma');
 const less = require('gulp-less');
 const named = require('vinyl-named');
 const open = require('open');
@@ -156,6 +157,23 @@ gulp.task('server:doc', () => {
 });
 
 gulp.task('server', [ 'server:app' ]);
+
+gulp.task('test:unit', done => {
+  new karma.Server({
+    configFile: path.join(__dirname, 'karma.config.js'),
+  }, done).start();
+});
+
+gulp.task('test:chrome', done => {
+  new karma.Server({
+    configFile: path.join(__dirname, 'karma.config.js'),
+    browsers: [ 'Chrome' ],
+    autoWatch: true,
+    singleRun: false,
+  }, done).start();
+});
+
+gulp.task('test', [ 'test:unit' ]);
 
 gulp.task('dynamodb', () => {
   const PORT = 4567;
