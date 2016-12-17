@@ -17,7 +17,7 @@ module.exports = config => {
     failOnEmptyTestSuite: false,
 
     files: [
-      'app/test/**/*.spec.js',
+      'app/tests/unit/**/*.spec.js',
     ],
 
     frameworks: [
@@ -34,13 +34,13 @@ module.exports = config => {
 
     preprocessors: {
       'app/lib/**/*.js': [ 'webpack', 'babel' ],
-      'app/test/**/*.js': [ 'webpack', 'babel' ],
+      'app/tests/**/*.js': [ 'webpack', 'babel' ],
     },
 
     webpack: webpack,
 
     htmlReporter: {
-      outputFile: 'dist/unit-test/index.html',
+      outputFile: 'dist/unit-tests/index.html',
       groupSuites: true,
       useCompactStyle: true,
     },

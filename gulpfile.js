@@ -11,6 +11,7 @@ const handlebars = require('gulp-compile-handlebars');
 const htmlmin = require('gulp-htmlmin');
 const karma = require('karma');
 const less = require('gulp-less');
+const mocha = require('gulp-mocha');
 const named = require('vinyl-named');
 const open = require('open');
 const rename = require('gulp-rename');
@@ -100,7 +101,7 @@ gulp.task('app:zip', [
   'app:js',
 ], () => {
   return gulp
-  .src(path.join(DIST_DIR, 'app', '*'))
+  .src(path.join(DIST_DIR, 'app', '**', '*'))
   .pipe(zip('app.zip'))
   .pipe(gulp.dest(DIST_DIR))
   ;
@@ -125,7 +126,7 @@ gulp.task('doc:generate', () => {
 
 gulp.task('doc:zip', [ 'doc:generate' ], () => {
   return gulp
-  .src(path.join(DIST_DIR, 'docs', '*'))
+  .src(path.join(DIST_DIR, 'docs', '**', '*'))
   .pipe(zip('docs.zip'))
   .pipe(gulp.dest(DIST_DIR))
   ;
@@ -173,7 +174,31 @@ gulp.task('test:chrome', done => {
   }, done).start();
 });
 
-gulp.task('test', [ 'test:unit' ]);
+gulp.task('test:e2e', () => {
+  return gulp
+  .src(path.join(SRC_DIR, 'tests', 'e2e', '**', '*.spec.js'))
+  .pipe(mocha({
+    compilers: {
+      js: require('babel-core/register'),
+    },
+    reporter: 'mochawesome',
+    reporterOptions: {
+      reportDir: path.join(DIST_DIR, 'e2e-tests'),
+      reportName: 'index',
+    },
+  }))
+  ;
+});
+
+gulp.task('test:zip', [ 'test:unit', 'test:e2e' ], () => {
+  return gulp
+  .src(path.join(DIST_DIR, '@(unit|e2e)-@(tests|coverage)', '**', '*'))
+  .pipe(zip('tests.zip'))
+  .pipe(gulp.dest(DIST_DIR))
+  ;
+});
+
+gulp.task('test', [ 'test:unit', 'test:e2e', 'test:zip' ]);
 
 gulp.task('dynamodb', () => {
   const PORT = 4567;
