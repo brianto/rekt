@@ -26,7 +26,7 @@ const config = {
   bower: require('./bower.json'),
 };
 
-const DIST_DIR = 'dist'
+const DIST_DIR = 'dist';
 const SRC_DIR = 'app';
 
 gulp.task('clean', () => {

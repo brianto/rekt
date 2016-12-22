@@ -49,7 +49,7 @@ module.exports = config => {
       dir: 'dist',
       subdir: 'unit-coverage',
       reporters: [
-        { type: 'text', file: 'coverage.txt' },
+        { type: 'html' },
       ],
     },
 
