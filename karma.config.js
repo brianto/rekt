@@ -17,6 +17,11 @@ module.exports = config => {
     failOnEmptyTestSuite: false,
 
     files: [
+      // ...because es6 ...and phantom
+      // https://kangax.github.io/compat-table/es6/#phantom
+      // https://github.com/babel/karma-babel-preprocessor#polyfill
+      'node_modules/babel-polyfill/dist/polyfill.js',
+
       'app/tests/unit/**/*.spec.js',
     ],
 

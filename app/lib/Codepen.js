@@ -1,4 +1,4 @@
-const URL_MATCH = /codepen\.io\/([^.]+)\/(?:pen|details|full|pres)\/([^.]+)(?:.(.+))?$/;
+const URL_MATCH = /codepen\.io\/([^.]+)\/(?:[^\/]+)\/([^.\/]+)(?:.(.+))?\/*$/;
 const ALL_TYPES = [ 'js', 'css', 'html' ];
 const LANGUAGE_MAP = {
   js: 'javascript',
