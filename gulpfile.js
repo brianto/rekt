@@ -7,6 +7,8 @@ const cleancss = require('gulp-clean-css');
 const concat = require('gulp-concat');
 const documentation = require('gulp-documentation');
 const dynamo = require('dynamodb-local');
+const eslint = require('gulp-eslint');
+const file = require('gulp-file');
 const handlebars = require('gulp-compile-handlebars');
 const htmlmin = require('gulp-htmlmin');
 const karma = require('karma');
@@ -190,15 +192,35 @@ gulp.task('test:e2e', () => {
   ;
 });
 
+gulp.task('test:lint', () => {
+  return gulp
+  .src([
+    path.join(SRC_DIR, 'lib', '**', '*.js'),
+    path.join(SRC_DIR, '*.js'),
+  ])
+  .pipe(eslint())
+  .pipe(eslint.format('codeframe'))
+  .pipe(eslint.format('html', result => {
+    file('index.html', result, { src: true })
+    .pipe(gulp.dest(path.join(DIST_DIR, 'eslint')))
+    ;
+  }))
+  .pipe(eslint.failAfterError())
+  ;
+});
+
 gulp.task('test:zip', [ 'test:unit', 'test:e2e' ], () => {
   return gulp
-  .src(path.join(DIST_DIR, '@(unit|e2e)-@(tests|coverage)', '**', '*'))
+  .src([
+    path.join(DIST_DIR, '@(unit|e2e)-@(tests|coverage)', '**', '*'),
+    path.join(DIST_DIR, 'eslint', '**', '*'),
+   ])
   .pipe(zip('tests.zip'))
   .pipe(gulp.dest(DIST_DIR))
   ;
 });
 
-gulp.task('test', [ 'test:unit', 'test:e2e', 'test:zip' ]);
+gulp.task('test', [ 'test:unit', 'test:e2e', 'test:lint', 'test:zip' ]);
 
 gulp.task('dynamodb', () => {
   const PORT = 4567;
