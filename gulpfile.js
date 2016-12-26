@@ -116,8 +116,6 @@ gulp.task('app', [
   'app:zip',
 ]);
 
-gulp.task('default', [ 'bower', 'app' ]);
-
 gulp.task('doc:generate', () => {
   return gulp
   .src(path.join(SRC_DIR, '**', '*.js'))
@@ -221,6 +219,8 @@ gulp.task('test:zip', [ 'test:unit', 'test:e2e' ], () => {
 });
 
 gulp.task('test', [ 'test:unit', 'test:e2e', 'test:lint', 'test:zip' ]);
+
+gulp.task('default', [ 'bower', 'app', 'test', 'doc' ]);
 
 gulp.task('dynamodb', () => {
   const PORT = 4567;
