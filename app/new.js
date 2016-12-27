@@ -1,5 +1,5 @@
 import { CodepenOrigin } from './lib/Codepen';
-import Prism from 'prism';
+import Prism from './lib/Prism';
 
 const ORIGIN_FACTORIES = [
   CodepenOrigin,
