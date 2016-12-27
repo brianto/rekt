@@ -41,10 +41,27 @@ ul#files {
   li {
     margin-bottom: 0;
   }
+
+  a {
+    text-decoration: none;
+  }
+
+  .selected {
+    border-bottom: 1px solid lightgrey;
+    font-weight: bold;
+  }
 }
 
 pre {
   margin-top: 0;
+  white-space: pre-wrap;
+  max-height: 32rem;
+  overflow-y: scroll;
+
+  code {
+    white-space: pre-wrap;
+    overflow-x: scroll
+  }
 }
 
 .vspace {
