@@ -1,9 +1,10 @@
 const URL_MATCH = /codepen\.io\/([^.]+)\/(?:[^\/]+)\/([^.\/]+)(?:.(.+))?\/*$/;
 const ALL_TYPES = [ 'js', 'css', 'html' ];
 const LANGUAGE_MAP = {
-  js: 'javascript',
-  css: 'css',
-  html: 'markup',
+  babel: 'javascript',
+  postcss: 'scss', // Close enough
+  pug: 'jade', // https://github.com/pugjs/pug/issues/2184
+  slim: 'jade', // Close enough
 };
 
 export class CodepenOrigin {
@@ -47,6 +48,15 @@ export class CodepenSource {
       return Promise.resolve(this._code);
     }
 
+    return this._ajax()
+    .then(code => {
+      this._code = code;
+      return Promise.resolve(this._code);
+    })
+    ;
+  }
+
+  _ajax() {
     return new Promise((resolve, reject) => {
       $.ajax({
         url: `https://codepen.io/${this.username}/pen/${this.id}.${this.type}`,
@@ -58,10 +68,7 @@ export class CodepenSource {
         // something that can be run and **will** run it.
         dataType: 'text/plain',
 
-        success: code => {
-          this._code = code;
-          resolve(this._code);
-        },
+        success: resolve,
         error: (/* xhr, type, error */) => reject(Array.from(arguments)),
       });
     });

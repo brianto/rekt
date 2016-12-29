@@ -29,6 +29,7 @@ module.exports = config => {
       'mocha',
       'chai',
       'sinon',
+      'sinon-chai',
     ],
 
     reporters: [

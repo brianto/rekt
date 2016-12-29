@@ -1,4 +1,5 @@
 import { CodepenOrigin, CodepenSource } from '../../lib/Codepen';
+import Prism from '../../lib/Prism';
 
 describe('Codepen', () => {
 
@@ -72,18 +73,16 @@ describe('Codepen', () => {
         expect(full.sources).to.be.instanceof(Promise);
       });
 
-      it('should return three sources without only', done => {
+      it('should return three sources without only', () => {
         // Sources are css, html, and js, maybe with different preprocessors
-        full.sources.then(sources => {
+        return full.sources.then(sources => {
           expect(sources.length).to.equal(3);
-          done();
         });
       });
 
-      it('should return one source with only', done => {
-        html.sources.then(sources => {
+      it('should return one source with only', () => {
+        return html.sources.then(sources => {
           expect(sources.length).to.equal(1);
-          done();
         });
       });
 
@@ -92,7 +91,123 @@ describe('Codepen', () => {
   });
 
   describe('CodepenSource', () => {
-    // TODO
+
+    describe('#filename', () => {
+
+      it('should resolve to a filename with the correct extension', done => {
+        const source = new CodepenSource('id', 'somebody', 'sass');
+
+        source.filename.then(filename => {
+          expect(filename).to.match(/\.sass$/);
+
+          done();
+        });
+      });
+
+    });
+
+    describe('#language', () => {
+
+      function expectLanguages(languages, expectation) {
+        const languagePromises = languages
+        .map(language => new CodepenSource('id', 'somebody', language))
+        .map(source => source.language)
+        ;
+
+        return Promise
+        .all(languagePromises)
+        .then(languages => languages.forEach(expectation))
+        ;
+      }
+
+      it('should resolve common languages as Prism languages', () => {
+        const markup = [ 'html', 'haml', 'markdown', 'pug' ];
+        const style = [ 'css', 'less', 'sass', 'scss', 'stylus' ];
+        const script = [ 'js', 'coffeescript', 'livescript', 'typescript' ];
+        const languages = markup.concat(style, script);
+
+        return expectLanguages(languages, language => {
+          const prism = Prism.languages[language];
+
+          expect(prism).to.exist;
+        });
+      });
+
+      it('should resolve overridden languages as Prism langauges', () => {
+        return expectLanguages([ 'babel', 'sass', 'pug', 'slim' ], language => {
+          const prism = Prism.languages[language];
+
+          expect(prism).to.exist;
+        });
+      });
+
+    });
+
+    describe('#code', () => {
+      let server;
+
+      before(() => {
+        server = sinon.fakeServer.create({
+          autoRespond: true,
+        });
+      });
+
+      after(() => {
+        server.restore();
+      });
+
+      it('should return raw code', () => {
+        const html = '<p>test</p>';
+
+        server.respondWith('GET', 'https://codepen.io/somebody/pen/id.html',
+          [ 200, { 'Content-Type': 'text/html' }, html ]);
+
+        return new CodepenSource('id', 'somebody', 'html')
+        .code
+        .then(code => {
+          expect(code).to.equal(html);
+        })
+        ;
+      });
+
+      it('should not try to run javascript', () => {
+        const js = 'window.pass = false; console.warn("JavaScript executed");';
+
+        window.pass = true;
+
+        server.respondWith('GET', 'https://codepen.io/somebody/pen/id.js',
+          [ 200, { 'Content-Type': 'text/javascript' }, js ]);
+
+        return new CodepenSource('id', 'somebody', 'js')
+        .code
+        .then(code => {
+          expect(code).to.equal(js);
+          expect(window.pass).to.be.true;
+        })
+        .catch(err => {
+          assert(false, 'JavaScript executed');
+        })
+        ;
+      });
+
+      it('should return cached code on subsequent calls', () => {
+        const js = 'true;';
+        const source = new CodepenSource('id', 'somebody', 'js');
+        const spy = sinon.spy(source, '_ajax');
+
+        server.respondWith('GET', 'https://codepen.io/somebody/pen/id.js',
+          [ 200, { 'Content-Type': 'text/javascript' }, js ]);
+
+        return source.code.then(original => {
+          return source.code.then(cached => {
+            expect(cached).to.equal(original);
+            expect(spy).to.be.calledOnce;
+          });
+        });
+      });
+
+    });
+
   });
 
 });
