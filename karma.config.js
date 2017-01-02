@@ -44,6 +44,9 @@ module.exports = config => {
     },
 
     webpack: webpack,
+    webpackMiddleware: {
+      stats: 'minimal',
+    },
 
     htmlReporter: {
       outputFile: 'dist/unit-tests/index.html',
