@@ -3,6 +3,12 @@ import { AnnotationPlugin } from '../../../lib/prism/AnnotationPlugin';
 import Prism from '../../../lib/Prism';
 
 describe('AnnotationPlugin', () => {
+  const SOURCE = `
+class Derp:
+  """It's derp!"""
+  pass
+  `.trim();
+
   let plugin;
   let pre;
   let code;
@@ -20,20 +26,44 @@ describe('AnnotationPlugin', () => {
     pre = $('pre.language-python');
     code = pre.find('code');
 
-    const source = `
-class Derp:
-  """It's derp!"""
-  pass
-    `.trim();
-    code.text(source);
+    code.text(SOURCE);
 
   });
 
-  it('had its hooks called', () => {
-    const spy = sinon.spy(plugin, 'transform');
+  describe('#install', () => {
 
-    Prism.highlightElement(pre[0]);
+    it('had its hooks called', () => {
+      const prepare = sinon.spy(plugin, 'prepare');
+      const transform = sinon.spy(plugin, 'transform');
 
-    expect(spy).to.be.calledOnce;
+      Prism.highlightElement(pre[0]);
+
+      expect(prepare).to.be.calledOnce;
+      expect(transform).to.be.calledOnce;
+    });
+
   });
+
+  describe('#prepare', () => {
+
+    it('should save the original source lines', () => {
+      plugin.prepare({
+        code: SOURCE,
+      });
+
+      expect(plugin.lines).to.be.an('array');
+      expect(plugin.lines.join('\n')).to.equal(SOURCE);
+    });
+
+    it('should have no lines when source is missing', () => {
+      plugin.prepare({
+        code: undefined,
+      });
+
+      expect(plugin.lines).to.be.an('array');
+      expect(plugin.lines).to.be.empty;
+    });
+
+  });
+
 });

@@ -7,6 +7,10 @@ export class AnnotationPlugin {
 
   }
 
+  prepare(env) {
+    this.lines = env.code ? env.code.split('\n') : [];
+  }
+
   transform(env) {
     if (!env.code) {
       return;
@@ -16,6 +20,7 @@ export class AnnotationPlugin {
   }
 
   install(Prism) {
+    Prism.hooks.add('before-highlight', env => this.prepare(env));
     Prism.hooks.add('after-highlight', env => this.transform(env));
   }
 
