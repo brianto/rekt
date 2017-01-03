@@ -55,7 +55,6 @@ ul#files {
 pre {
   margin-top: 0;
   white-space: pre-wrap;
-  max-height: 32rem;
   overflow-y: scroll;
 
   code {
@@ -64,6 +63,22 @@ pre {
   }
 }
 
+.form-preview {
+  max-height: 32rem;
+}
+
+.annotation-plugin {
+  user-select: none;
+
+  .line-number {
+    display: inline-block;
+    width: 3rem;
+  }
+
+  &:hover {
+    background: lightgrey;
+  }
+}
 .vspace {
   height: 6rem;
 }
