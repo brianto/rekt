@@ -60,7 +60,7 @@ export class CodepenSource {
     return new Promise((resolve, reject) => {
       $.ajax({
         url: `https://codepen.io/${this.username}/pen/${this.id}.${this.type}`,
-        method: 'GET',
+        type: 'GET',
 
         // Codepen correctly sets the content type of the file. However, that's
         // not what we want here. If the content type happens to be

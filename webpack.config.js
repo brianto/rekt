@@ -8,6 +8,9 @@ module.exports = {
   resolve: {
     modulesDirectories: [ 'bower_components' ],
   },
+  loader: {
+    configEnvironment: process.env.NODE_ENV || 'development',
+  },
   module: {
     loaders: [
       {
@@ -16,8 +19,13 @@ module.exports = {
         loader : 'babel',
       },
       {
+        test: /\/config\.js$/,
+        loader : 'webpack-config',
+      },
+      {
         test: /.js$/,
         loader : 'imports',
+        exclude: /\/config\.js$/,
         query: {
           'zepto': 'zepto',
         }

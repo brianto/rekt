@@ -9,6 +9,7 @@ const documentation = require('gulp-documentation');
 const dynamo = require('dynamodb-local');
 const eslint = require('gulp-eslint');
 const file = require('gulp-file');
+const gls = require('gulp-live-server');
 const handlebars = require('gulp-compile-handlebars');
 const htmlmin = require('gulp-htmlmin');
 const karma = require('karma');
@@ -134,7 +135,16 @@ gulp.task('doc:zip', [ 'doc:generate' ], () => {
 
 gulp.task('doc', [ 'doc:generate', 'doc:zip' ]);
 
-gulp.task('server:app', () => {
+gulp.task('server:doc', () => {
+  gulp.watch(path.join(SRC_DIR, '**', '*.js'), [ 'doc:generate' ]);
+
+  return gulp
+  .src(path.join(DIST_DIR, 'docs'))
+  .pipe(webserver({ open: true }))
+  ;
+});
+
+gulp.task('server:app', [ 'server:localdev:storage' ], () => {
   gulp.watch(path.join(SRC_DIR, '**', '*.html.hbs'), [ 'app:html' ]);
   gulp.watch(path.join(SRC_DIR, '**', '*.less'), [ 'app:css' ]);
   gulp.watch(path.join(SRC_DIR, '**', '*.js'), [ 'app:js' ]);
@@ -148,13 +158,14 @@ gulp.task('server:app', () => {
   ;
 });
 
-gulp.task('server:doc', () => {
-  gulp.watch(path.join(SRC_DIR, '**', '*.js'), [ 'doc:generate' ]);
+gulp.task('server:localdev:storage', [ 'server:localdev:dynamodb' ], () => {
+  const server = gls.new('localdev/storage.js');
+  server.start();
+});
 
-  return gulp
-  .src(path.join(DIST_DIR, 'docs'))
-  .pipe(webserver({ open: true }))
-  ;
+gulp.task('server:localdev:dynamodb', () => {
+  const PORT = 4567;
+  dynamo.launch(PORT, null, [ '-sharedDb' ]);
 });
 
 gulp.task('server', [ 'server:app' ]);

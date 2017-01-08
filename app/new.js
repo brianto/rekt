@@ -1,4 +1,6 @@
 import { CodepenOrigin } from './lib/Codepen';
+import { Storage } from './lib/Storage';
+
 import Prism from './lib/Prism';
 
 const ORIGIN_FACTORIES = [
@@ -13,14 +15,20 @@ function originFor(url) {
 class FormPreview {
 
   constructor({
-    container, files, render, preview, source, submit, initialize = true,
+    container, description, files, render, preview, source, submit, submitter, title,
+    initialize = true, storage = new Storage({}),
   }) {
     this.container = container;
+    this.description = description;
     this.files = files;
     this.render = render;
     this.preview = preview;
     this.source = source;
     this.submit = submit;
+    this.submitter = submitter;
+    this.title = title;
+
+    this.storage = storage;
 
     if (initialize) {
       this._init();
@@ -68,6 +76,22 @@ class FormPreview {
   }
 
   onSubmit(event) {
+    return this.storage.createReview({
+      title: this.title.val(),
+      description: this.description.val(),
+      url: this.source.val(),
+      submitter: this.submitter.val(),
+    })
+    .then(response => this.onReviewCreated(response))
+    .catch((xhr, type, error) => this.onReviewFail(xhr, type, error))
+    ;
+  }
+
+  onReviewCreated(response) {
+    // TODO
+  }
+
+  onReviewFail(xhr, type, error) {
     // TODO
   }
 
@@ -118,10 +142,13 @@ class FormPreview {
 $($ => {
   const preview = new FormPreview({
     container: $('#review'),
+    description: $('#description'),
     files: $('#files'),
     render: $('#render'),
     preview: $('#preview'),
     source:$ ('#source'),
     submit:$ ('#submit'),
+    submitter:$ ('#submitter'),
+    title:$ ('#title'),
   });
 });
