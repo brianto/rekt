@@ -24,7 +24,7 @@
     "normalize-css": "^5.0.0",
     "prism": "prismjs#^1.6.0",
     "skeleton": "^2.0.4",
-    "zepto": "^1.1.6",
+    "zepto": "~1.1.6",
     "marked": "^0.3.6"
   },
   "overrides": {
