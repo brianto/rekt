@@ -4,14 +4,16 @@ var AWS = require('aws-sdk');
 var uuid = require('uuid');
 
 // Express Config
+var PORT = 7000;
 var app = express();
 app.use(parser.json());
-app.all('*', function(req, res, next) {
+app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   next();
 });
+app.use(express.static('localdev/sample-code'));
 
 // AWS Config
 AWS.config.setPromisesDependency(Promise);
@@ -95,16 +97,16 @@ dynamodb.createTable({
   return `Created Table: ${data.TableDescription.TableName}`;
 }))
 .then(updateReview({
-  title: 'Python Turle',
-  description: 'CS1 Assignment',
-  url: 'http://localhost:2020/turtle.py',
-  submitter: 'freshman',
+  title: 'Fizz Buzz',
+  description: 'Scheme',
+  url: `http://localhost:${PORT}/scheme/fizz-buzz.scm`,
+  submitter: 'little schemer',
 }))
 .then(updateReview({
-  title: 'Pizza Delivery System',
-  description: 'SE 361',
-  url: 'http://localhost:2020/pds.git',
-  submitter: 'sophomore',
+  title: 'Fizz Buzz',
+  description: 'Java',
+  url: `http://localhost:${PORT}/java/FizzBuzz.java`,
+  submitter: 'james gosling',
 }))
 .catch(awsError)
 ;
@@ -158,8 +160,7 @@ app.get('/reviews/:id', function(req, res) {
 });
 
 // Serve
-var port = 7000;
-app.listen(port, function() {
-  console.log(`localdev serving on port ${port}`);
+app.listen(PORT, function() {
+  console.log(`localdev serving on port ${PORT}`);
 });
 
