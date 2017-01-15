@@ -1,22 +1,13 @@
-import { CodepenOrigin } from './lib/Codepen';
+import { OriginFactory } from './lib/OriginFactory';
 import { Storage } from './lib/Storage';
 
 import Prism from './lib/Prism';
-
-const ORIGIN_FACTORIES = [
-  CodepenOrigin,
-];
-
-function originFor(url) {
-  const factory = ORIGIN_FACTORIES.find(f => f.handles(url));
-  return new factory(url);
-}
 
 class FormPreview {
 
   constructor({
     container, description, files, render, preview, source, submit, submitter, title,
-    initialize = true, storage = new Storage({}),
+    initialize = true, storage = new Storage({}), origins = new OriginFactory(),
   }) {
     this.container = container;
     this.description = description;
@@ -29,6 +20,7 @@ class FormPreview {
     this.title = title;
 
     this.storage = storage;
+    this.origins = origins;
 
     if (initialize) {
       this._init();
@@ -62,7 +54,7 @@ class FormPreview {
 
   onPreview(event) {
     const url = this.source.val();
-    const origin = originFor(url);
+    const origin = this.origins.originFor(url);
 
     this.container.show();
     this.submit.show();

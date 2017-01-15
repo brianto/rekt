@@ -1,4 +1,5 @@
 import { Storage } from './lib/Storage';
+import { OriginFactory } from './lib/OriginFactory';
 
 import qs from 'qs';
 
@@ -8,7 +9,7 @@ class CodeReview {
 
   constructor({
     title, description, submitter, timestamp,
-    initialize = true, storage = new Storage({}),
+    initialize = true, storage = new Storage({}), origins = new OriginFactory(),
   }) {
     this.title = title;
     this.description = description;
@@ -16,6 +17,7 @@ class CodeReview {
     this.timestamp = timestamp;
 
     this.storage = storage;
+    this.origins = origins;
 
     this.query = {};
 
@@ -60,6 +62,11 @@ class CodeReview {
   }
 
   renderCode(review) {
+    const origin = this.origins.originFor(review.url);
+    origin.sources.then(sources => sources.forEach(s => this.renderSource(s)));
+  }
+
+  renderSource(source) {
     // TODO
   }
 }
