@@ -69,5 +69,45 @@ describe('Storage', () => {
     });
   });
 
+  describe('#review', () => {
+    const ID = '1234';
+    const ENDPOINT = `/endpoint/${ID}`;
+
+    let urls;
+    let storage;
+
+    beforeEach(() => {
+      urls = mockUrls('review');
+      storage = new Storage({ urls: urls });
+    });
+
+    it('should call json endpoint', () => {
+      sinon.stub(urls, 'review').withArgs(ID).returns(ENDPOINT);
+
+      server.respondWith('GET', ENDPOINT,
+        [ 200, { 'Content-Type': 'application/json' }, JSON.stringify({ }) ]);
+
+      return storage.review(ID)
+      .then(data => {
+        expect(data).to.exist;
+      })
+      ;
+    });
+
+    it('should reject on error', () => {
+      const STATUS = 403;
+      sinon.stub(urls, 'review').withArgs(ID).returns(ENDPOINT);
+
+      server.respondWith('POST', ENDPOINT, [ STATUS, { }, '' ]);
+
+      return storage.review(ID)
+      .catch(error => {
+        // TODO doesn't catch the negative case
+        expect(error).to.exist;
+      })
+      ;
+    });
+  });
+
 });
 

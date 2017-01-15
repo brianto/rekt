@@ -25,4 +25,15 @@ export class Storage {
     });
   }
 
+  review(id) {
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        url: this.urls.review(id),
+        type: 'GET',
+
+        success: resolve,
+        error: reject, // TODO wrap zepto params as error object
+      });
+    });
+  }
 }
