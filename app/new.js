@@ -80,7 +80,7 @@ class FormPreview {
   }
 
   onReviewCreated(response) {
-    // TODO
+    window.location.replace(`/review.html?id=${response.id}`);
   }
 
   onReviewFail(xhr, type, error) {
