@@ -8,9 +8,6 @@ module.exports = {
   resolve: {
     modulesDirectories: [ 'bower_components' ],
   },
-  loader: {
-    configEnvironment: process.env.NODE_ENV || 'development',
-  },
   module: {
     loaders: [
       {
@@ -19,13 +16,8 @@ module.exports = {
         loader : 'babel',
       },
       {
-        test: /\/config\.js$/,
-        loader : 'webpack-config',
-      },
-      {
         test: /.js$/,
         loader : 'imports',
-        exclude: /\/config\.js$/,
         query: {
           'zepto': 'zepto',
         }
@@ -33,6 +25,11 @@ module.exports = {
     ],
   },
   plugins: [
+    // Expose process.env vars to config.js
+    new webpack.DefinePlugin({
+      REKT_API_GATEWAY_ENDPOINT: JSON.stringify(process.env.REKT_API_GATEWAY_ENDPOINT || 'http://localhost:7000'),
+    }),
+
     // Make Bower work
     new webpack.ResolverPlugin(
         new webpack.ResolverPlugin.DirectoryDescriptionFilePlugin('bower.json', [ 'main' ])),

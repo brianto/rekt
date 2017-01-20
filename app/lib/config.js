@@ -1,5 +1,3 @@
-module.exports = {
-  development: {
-    baseUrl: 'http://localhost:7000',
-  },
-};
+export default {
+  baseUrl: REKT_API_GATEWAY_ENDPOINT,
+}
