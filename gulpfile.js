@@ -22,7 +22,6 @@ const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
 const webpack = require('webpack-stream');
 const webserver = require('gulp-webserver');
-const zip = require('gulp-zip');
 
 const config = {
   node: require('./package.json'),
@@ -43,21 +42,16 @@ gulp.task('bower:css', () => {
   .pipe(cleancss())
   .pipe(concat('vendor.min.css'))
   .pipe(sourcemaps.write('.'))
-  .pipe(gulp.dest(path.join(DIST_DIR, 'app', 'css')))
+  .pipe(gulp.dest(path.join(DIST_DIR, 'css')))
   ;
 });
 
 gulp.task('bower:fonts', () => {
   return gulp
   .src(bower.ext([ 'eot', 'otf', 'svg', 'ttf', 'woff', 'woff2' ]).files)
-  .pipe(gulp.dest(path.join(DIST_DIR, 'app', 'fonts')))
+  .pipe(gulp.dest(path.join(DIST_DIR, 'fonts')))
   ;
 })
-
-gulp.task('bower', [
-  'bower:css',
-  'bower:fonts',
-]);
 
 gulp.task('app:html', () => {
   return gulp
@@ -73,7 +67,7 @@ gulp.task('app:html', () => {
     removeComments: true,
   }))
   .pipe(rename(path => path.extname = ''))
-  .pipe(gulp.dest(path.join(DIST_DIR, 'app')))
+  .pipe(gulp.dest(DIST_DIR))
   ;
 });
 
@@ -85,7 +79,7 @@ gulp.task('app:css', () => {
   .pipe(cleancss())
   .pipe(concat('style.min.css'))
   .pipe(sourcemaps.write('.'))
-  .pipe(gulp.dest(path.join(DIST_DIR, 'app', 'css')))
+  .pipe(gulp.dest(path.join(DIST_DIR, 'css')))
   ;
 });
 
@@ -94,30 +88,19 @@ gulp.task('app:js', () => {
   .src(path.join(SRC_DIR, '*.js'))
   .pipe(named())
   .pipe(webpack(require('./webpack.config.js')))
-  .pipe(gulp.dest(path.join(DIST_DIR, 'app', 'js')))
+  .pipe(gulp.dest(path.join(DIST_DIR, 'js')))
   ;
 });
 
-gulp.task('app:zip', [
+gulp.task('build', [
+  'bower:css',
+  'bower:fonts',
   'app:html',
   'app:css',
   'app:js',
-], () => {
-  return gulp
-  .src(path.join(DIST_DIR, 'app', '**', '*'))
-  .pipe(zip('app.zip'))
-  .pipe(gulp.dest(DIST_DIR))
-  ;
-});
-
-gulp.task('app', [
-  'app:html',
-  'app:css',
-  'app:js',
-  'app:zip',
 ]);
 
-gulp.task('doc:generate', () => {
+gulp.task('document:js', () => {
   return gulp
   .src(path.join(SRC_DIR, '**', '*.js'))
   .pipe(documentation('html'))
@@ -125,24 +108,7 @@ gulp.task('doc:generate', () => {
   ;
 });
 
-gulp.task('doc:zip', [ 'doc:generate' ], () => {
-  return gulp
-  .src(path.join(DIST_DIR, 'docs', '**', '*'))
-  .pipe(zip('docs.zip'))
-  .pipe(gulp.dest(DIST_DIR))
-  ;
-});
-
-gulp.task('doc', [ 'doc:generate', 'doc:zip' ]);
-
-gulp.task('server:doc', () => {
-  gulp.watch(path.join(SRC_DIR, '**', '*.js'), [ 'doc:generate' ]);
-
-  return gulp
-  .src(path.join(DIST_DIR, 'docs'))
-  .pipe(webserver({ open: true }))
-  ;
-});
+gulp.task('document', [ 'document:js' ]);
 
 gulp.task('server:app', [ 'server:localdev:storage' ], () => {
   gulp.watch(path.join(SRC_DIR, '**', '*.html.hbs'), [ 'app:html' ]);
@@ -150,7 +116,7 @@ gulp.task('server:app', [ 'server:localdev:storage' ], () => {
   gulp.watch(path.join(SRC_DIR, '**', '*.js'), [ 'app:js' ]);
 
   return gulp
-  .src(path.join(DIST_DIR, 'app'))
+  .src(DIST_DIR)
   .pipe(webserver({
     livereload: true,
     open: true,
@@ -218,20 +184,9 @@ gulp.task('test:lint', () => {
   ;
 });
 
-gulp.task('test:zip', [ 'test:unit', 'test:e2e' ], () => {
-  return gulp
-  .src([
-    path.join(DIST_DIR, '@(unit|e2e)-@(tests|coverage)', '**', '*'),
-    path.join(DIST_DIR, 'eslint', '**', '*'),
-   ])
-  .pipe(zip('tests.zip'))
-  .pipe(gulp.dest(DIST_DIR))
-  ;
-});
+gulp.task('test', [ 'test:unit', 'test:e2e', 'test:lint' ]);
 
-gulp.task('test', [ 'test:unit', 'test:e2e', 'test:lint', 'test:zip' ]);
-
-gulp.task('default', [ 'bower', 'app', 'test', 'doc' ]);
+gulp.task('default', [ 'build', 'server' ]);
 
 gulp.task('dynamodb', () => {
   const PORT = 4567;
