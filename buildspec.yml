@@ -1,0 +1,25 @@
+---
+version: 0.1
+
+phases:
+
+  install:
+    commands:
+      - echo Installing as $(whoami)
+      - npm install
+      - $(npm bin)/bower install --allow-root
+
+  build:
+    commands:
+      - $(npm bin)/gulp build
+      - $(npm bin)/gulp test
+      - $(npm bin)/gulp document
+
+  post_build:
+    commands:
+      - aws s3 sync dist s3://${REKT_WEBSITE_BUCKET}
+
+artifacts:
+  discard-paths: no
+  files:
+    - dist/**/*
