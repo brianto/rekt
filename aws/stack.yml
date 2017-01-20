@@ -1,0 +1,207 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  GithubOauthToken:
+    Description: |-
+      Oauth Token, see
+      http://docs.aws.amazon.com/codepipeline/latest/userguide/troubleshooting.html#troubleshooting-gs2
+    Type: String
+    NoEcho: true
+  GithubRepoOwner:
+    Description: Username (eg. 'brianto')
+    Type: String
+  GithubRepoName:
+    Description: Repository (eg. 'rekt')
+    Type: String
+    Default: rekt
+  GithubRepoBranch:
+    Description: Branch (eg. 'master')
+    Type: String
+    Default: master
+
+Metadata:
+  AWS::CloudFormation::Interface:
+
+    ParameterGroups:
+      - Label:
+          default: Github Repository
+        Parameters:
+          - GithubRepoOwner
+          - GithubRepoName
+          - GithubRepoBranch
+          - GithubOauthToken
+
+    ParameterLabels:
+      GithubRepoOwner:
+        default: Owner
+      GithubRepoName:
+        default: Repository
+      GithubRepoBranch:
+        default: Branch
+      GithubOauthToken:
+        default: Oauth Token
+
+Outputs:
+
+  site:
+    Description: Website URL
+    Value: !GetAtt artifacts.WebsiteURL
+
+Resources:
+
+  api:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Ref AWS::StackName
+      Description: Backend API
+
+  # TODO use swagger definition
+  # TODO use mock for now
+  get:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref api
+      ResourceId: !GetAtt api.RootResourceId
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+
+  deployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref api
+    DependsOn:
+      - get
+
+  stage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: production
+      RestApiId: !Ref api
+      DeploymentId: !Ref deployment
+
+  artifacts:
+    Type: AWS::S3::Bucket
+    Properties: {}
+
+  website:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: PublicRead
+      WebsiteConfiguration:
+        IndexDocument: index.html
+
+  public:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref website
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal: "*"
+            Action:
+              - s3:GetObject
+            Resource:
+              - !Sub arn:aws:s3:::${website}/*
+
+  build:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Ref AWS::StackName
+      ServiceRole: !Ref deployer
+      Source:
+        Type: CODEPIPELINE
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: aws/codebuild/nodejs:7.0.0
+        EnvironmentVariables:
+          - Name: REKT_API_GATEWAY_ENDPOINT
+            Value: !Sub https://${api}.execute-api.${AWS::Region}.amazonaws.com/${stage}
+          - Name: REKT_WEBSITE_BUCKET
+            Value: !Ref website
+      TimeoutInMinutes: 30
+
+  deployer:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-deployer
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+                - codepipeline.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSCodePipelineFullAccess
+        - arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess
+      Policies:
+        - PolicyName: CodeBuildServiceRolePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${AWS::StackName}:*
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+              - Effect: Allow
+                Resource:
+                  - !Sub arn:aws:s3:::${AWS::StackName}-*
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+
+  pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Ref AWS::StackName
+      RoleArn: !GetAtt deployer.Arn
+      RestartExecutionOnUpdate: Yes
+      ArtifactStore:
+        Type: S3
+        Location: !Ref artifacts
+      Stages:
+
+        - Name: Source
+          Actions:
+            - Name: Download
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: 1
+              Configuration:
+                Owner: !Ref GithubRepoOwner
+                Repo: !Ref GithubRepoName
+                Branch: !Ref GithubRepoBranch
+                OAuthToken: !Ref GithubOauthToken
+              OutputArtifacts:
+                - Name: !Sub ${AWS::StackName}-source
+
+        - Name: Build
+          Actions:
+            - Name: Frontend
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName: !Ref build
+              InputArtifacts:
+                - Name: !Sub ${AWS::StackName}-source
+              OutputArtifacts:
+                - Name: !Sub ${AWS::StackName}-dist
