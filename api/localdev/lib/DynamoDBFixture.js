@@ -13,36 +13,32 @@ export default class DynamoDBFixture {
     port, stackFile, localDbArgs = [ '-sharedDb' ],
   }) {
     this.port = port;
+    this.localDbArgs = localDbArgs;
 
-    const stack = yaml.load(fs.readFileSync(stackFile, 'utf8'), {
+    this.stack = yaml.load(fs.readFileSync(stackFile, 'utf8'), {
       schema: CLOUDFORMATION_SCHEMA,
       skipInvalid: true,
     });
 
-    dynamodb.launch(port, null, localDbArgs)
-    .then(() => this.setup(stack))
-    .catch(err => { throw new Error(err); })
-    ;
+    AWS.config.update({ endpoint: `http://localhost:${this.port}` });
   }
 
-  setup(stack) {
-    this.client = new AWS.DynamoDB({
-      endpoint: `http://localhost:${this.port}`,
+  setup() {
+    dynamodb.launch(this.port, null, this.localDbArgs)
+    .catch(err => {
+      throw new Error(err);
+    })
+    .then(() => {
+      this.client = new AWS.DynamoDB();
 
-      // Keys unused, but required
-      // Region doesn't matter, used only for naming
-      // https://aws.amazon.com/blogs/aws/dynamodb-local-for-desktop-development/
-      region: 'us-west-1',
-      accessKeyId: 'rekt',
-      secretAccessKey: 'rekt',
-    });
+      const tableDefinitions = this.findTableDefinitions(this.stack);
 
-    const tableDefinitions = this.findTableDefinitions(stack);
-
-    this.createTables(tableDefinitions).then(tables => {
-      tables.forEach(table => {
-        console.log(`Created Table: ${table.TableDescription.TableName}`);
-      });
+      this.createTables(tableDefinitions).then(tables => {
+        tables.map(table => {
+          console.log(`Created Table: ${table.TableDescription.TableName}`);
+        });
+      })
+      ;
     })
     ;
   }

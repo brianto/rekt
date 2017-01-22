@@ -38,6 +38,8 @@ const API_DIR = 'api';
 const DIST_DIR = 'dist';
 const DIST_SITE_DIR = path.join(DIST_DIR, 'site');
 const DIST_LOCALDEV_DIR = path.join(DIST_DIR, 'localdev');
+const DIST_AWS_DIR = path.join(DIST_DIR, 'aws');
+const DIST_AWS_LAMBDA_API_GATEWAY_DIR = path.join(DIST_AWS_DIR, 'lambda-api-gateway');
 
 gulp.task('clean', () => {
   return del([ DIST_DIR ]);
@@ -100,7 +102,7 @@ gulp.task('app:js', () => {
   ;
 });
 
-gulp.task('api:compile', () => {
+gulp.task('api:definition', () => {
   return gulp
   .src(path.join(API_DIR, '*.yml.hbs'))
   .pipe(handlebars({
@@ -116,13 +118,25 @@ gulp.task('api:compile', () => {
   ;
 });
 
+gulp.task('api:functions', () => {
+  return gulp
+  .src([
+    path.join(API_DIR, 'aws', '**', '*.js'),
+    path.join('!**', '*.spec.js'),
+  ])
+  .pipe(babel())
+  .pipe(gulp.dest(DIST_AWS_LAMBDA_API_GATEWAY_DIR))
+  ;
+});
+
 gulp.task('build', [
   'bower:css',
   'bower:fonts',
   'app:html',
   'app:css',
   'app:js',
-  'api:compile',
+  'api:definition',
+  'api:functions',
 ]);
 
 gulp.task('document:js', () => {
@@ -139,7 +153,8 @@ gulp.task('localdev:compile', () => {
   return gulp
   .src([
     'localdev.js',
-    path.join(API_DIR, 'localdev', '**', '*.js'),
+    path.join(API_DIR, '**', '*.js'),
+    path.join('!**', '*.spec.js'),
   ])
   .pipe(babel())
   .pipe(gulp.dest(DIST_LOCALDEV_DIR))

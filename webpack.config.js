@@ -27,7 +27,7 @@ module.exports = {
   plugins: [
     // Expose process.env vars to config.js
     new webpack.DefinePlugin({
-      REKT_API_GATEWAY_ENDPOINT: JSON.stringify(process.env.REKT_API_GATEWAY_ENDPOINT || 'http://localhost:7000'),
+      REKT_API_GATEWAY_ENDPOINT: JSON.stringify(process.env.REKT_API_GATEWAY_ENDPOINT || 'http://localhost:8000'),
     }),
 
     // Make Bower work

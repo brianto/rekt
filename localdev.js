@@ -1,6 +1,6 @@
 import connect from 'connect';
 
-import DynamoDBFixture from './lib/dynamodb';
+import DynamoDBFixture from './lib/DynamoDBFixture';
 
 import path from 'path';
 
@@ -26,6 +26,8 @@ const dynamodb = new DynamoDBFixture({
   stackFile: ARGV['stack'],
 });
 
+dynamodb.setup();
+
 swagger.create({
   appRoot: ARGV['api-path'],
   swagger: path.join(ARGV['api-path'], 'swagger.yml'),
@@ -34,6 +36,13 @@ swagger.create({
   if (err) {
     throw err;
   }
+
+  app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+  });
 
   app.use(livereload());
   app.use(serveStatic(ARGV['site-path']));

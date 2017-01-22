@@ -8,8 +8,8 @@ swagger:
 
     _router:
       name: swagger_router
-      mockControllersDirs: [ controllers ]
-      controllersDirs: [ controllers ]
+      mockControllersDirs: [ . ]
+      controllersDirs: [ . ]
 
     _swagger_validate:
       name: swagger_validator

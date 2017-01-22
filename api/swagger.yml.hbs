@@ -17,4 +17,71 @@ consumes:
 produces:
   - application/json
 
-paths: {}
+paths:
+  /reviews:
+    x-swagger-router-controller: controller
+    post:
+      description: Creates a new review
+      operationId: OnCreateReview
+      parameters:
+        - name: body
+          description: Request Payload
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CreateReviewRequest'
+      responses:
+        201:
+          description: Review Created
+          schema:
+            $ref: '#/definitions/Review'
+
+definitions:
+  CreateReviewRequest:
+    title: Create Review Request
+    required:
+      - title
+      - url
+      - submitter
+    properties:
+      title:
+        type: string
+        description: Review title
+      description:
+        type: string
+        description: Review description
+      url:
+        type: string
+        description: Review source url
+      submitter:
+        type: string
+        description: Review author
+
+  Review:
+    required:
+      - id
+      - timestamp
+      - title
+      - description
+      - url
+      - submitter
+    properties:
+      id:
+        type: string
+        description: UUID
+      timestamp:
+        type: integer
+        format: int64
+        description: Create date as unix epoch in milliseconds
+      title:
+        type: string
+        description: Review title
+      description:
+        type: string
+        description: Review description
+      url:
+        type: string
+        description: Review source url
+      submitter:
+        type: string
+        description: Review author
