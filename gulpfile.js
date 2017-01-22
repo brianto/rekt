@@ -23,13 +23,17 @@ const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
 const webpack = require('webpack-stream');
 const webserver = require('gulp-webserver');
+const yaml = require('gulp-yaml');
 
 const config = {
   node: require('./package.json'),
   bower: require('./bower.json'),
 };
 
+const LOCALDEV_SERVER_PORT = 8000;
+
 const SRC_DIR = 'app';
+const API_DIR = 'api';
 
 const DIST_DIR = 'dist';
 const DIST_SITE_DIR = path.join(DIST_DIR, 'site');
@@ -96,12 +100,29 @@ gulp.task('app:js', () => {
   ;
 });
 
+gulp.task('api:compile', () => {
+  return gulp
+  .src(path.join(API_DIR, '*.yml.hbs'))
+  .pipe(handlebars({
+    host: process.env.REKT_API_GATEWAY_ENDPOINT || `localhost:${LOCALDEV_SERVER_PORT}`,
+  }))
+  .pipe(rename(path => path.extname = ''))
+  .pipe(gulp.dest(DIST_SITE_DIR))
+  .pipe(gulp.dest(DIST_LOCALDEV_DIR))
+  .pipe(yaml({ safe: true }))
+  .pipe(rename(path => path.extname = '.json'))
+  .pipe(gulp.dest(DIST_SITE_DIR))
+  .pipe(gulp.dest(DIST_LOCALDEV_DIR))
+  ;
+});
+
 gulp.task('build', [
   'bower:css',
   'bower:fonts',
   'app:html',
   'app:css',
   'app:js',
+  'api:compile',
 ]);
 
 gulp.task('document:js', () => {
@@ -114,17 +135,33 @@ gulp.task('document:js', () => {
 
 gulp.task('document', [ 'document:js' ]);
 
-gulp.task('localdev', () => {
+gulp.task('localdev:compile', () => {
   return gulp
-  .src([ 'localdev.js' ])
+  .src([
+    'localdev.js',
+    path.join(API_DIR, 'localdev', '**', '*.js'),
+  ])
   .pipe(babel())
   .pipe(gulp.dest(DIST_LOCALDEV_DIR))
-  .on('end', () => {
-    return gls
-    .new(path.join(DIST_LOCALDEV_DIR, 'localdev.js'))
-    .start();
-  })
   ;
+});
+
+gulp.task('localdev:assets', () => {
+  return gulp
+  .src(path.join(API_DIR, 'localdev', '*.yml'))
+  .pipe(gulp.dest(DIST_LOCALDEV_DIR))
+  ;
+});
+
+gulp.task('localdev', [
+  'localdev:assets',
+  'localdev:compile',
+], () => {
+  return gls.new([
+    path.join(DIST_LOCALDEV_DIR, 'localdev.js'),
+    `--server-port=${LOCALDEV_SERVER_PORT}`,
+  ])
+  .start();
 });
 
 gulp.task('server:app', [ 'server:localdev:storage' ], () => {
