@@ -50,6 +50,41 @@ Outputs:
 
 Resources:
 
+  reviews:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+      # TODO maybe add GSI for monthly queries
+
+  comments:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+        - AttributeName: review
+          KeyType: HASH
+        - AttributeName: id
+          KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: review
+          AttributeType: S
+        - AttributeName: id
+          AttributeType: S
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+
   api:
     Type: AWS::ApiGateway::RestApi
     Properties:
