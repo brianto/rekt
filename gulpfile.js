@@ -2,6 +2,7 @@ const gulp = require('gulp');
 const del = require('del');
 const path = require('path');
 
+const babel = require('gulp-babel');
 const bower = require('bower-files')();
 const cleancss = require('gulp-clean-css');
 const concat = require('gulp-concat');
@@ -32,6 +33,7 @@ const SRC_DIR = 'app';
 
 const DIST_DIR = 'dist';
 const DIST_SITE_DIR = path.join(DIST_DIR, 'site');
+const DIST_LOCALDEV_DIR = path.join(DIST_DIR, 'localdev');
 
 gulp.task('clean', () => {
   return del([ DIST_DIR ]);
@@ -111,6 +113,19 @@ gulp.task('document:js', () => {
 });
 
 gulp.task('document', [ 'document:js' ]);
+
+gulp.task('localdev', () => {
+  return gulp
+  .src([ 'localdev.js' ])
+  .pipe(babel())
+  .pipe(gulp.dest(DIST_LOCALDEV_DIR))
+  .on('end', () => {
+    return gls
+    .new(path.join(DIST_LOCALDEV_DIR, 'localdev.js'))
+    .start();
+  })
+  ;
+});
 
 gulp.task('server:app', [ 'server:localdev:storage' ], () => {
   gulp.watch(path.join(SRC_DIR, '**', '*.html.hbs'), [ 'app:html' ]);
