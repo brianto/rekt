@@ -28,8 +28,10 @@ const config = {
   bower: require('./bower.json'),
 };
 
-const DIST_DIR = 'dist';
 const SRC_DIR = 'app';
+
+const DIST_DIR = 'dist';
+const DIST_SITE_DIR = path.join(DIST_DIR, 'site');
 
 gulp.task('clean', () => {
   return del([ DIST_DIR ]);
@@ -42,14 +44,14 @@ gulp.task('bower:css', () => {
   .pipe(cleancss())
   .pipe(concat('vendor.min.css'))
   .pipe(sourcemaps.write('.'))
-  .pipe(gulp.dest(path.join(DIST_DIR, 'css')))
+  .pipe(gulp.dest(path.join(DIST_SITE_DIR, 'css')))
   ;
 });
 
 gulp.task('bower:fonts', () => {
   return gulp
   .src(bower.ext([ 'eot', 'otf', 'svg', 'ttf', 'woff', 'woff2' ]).files)
-  .pipe(gulp.dest(path.join(DIST_DIR, 'fonts')))
+  .pipe(gulp.dest(path.join(DIST_SITE_DIR, 'fonts')))
   ;
 })
 
@@ -67,7 +69,7 @@ gulp.task('app:html', () => {
     removeComments: true,
   }))
   .pipe(rename(path => path.extname = ''))
-  .pipe(gulp.dest(DIST_DIR))
+  .pipe(gulp.dest(DIST_SITE_DIR))
   ;
 });
 
@@ -79,7 +81,7 @@ gulp.task('app:css', () => {
   .pipe(cleancss())
   .pipe(concat('style.min.css'))
   .pipe(sourcemaps.write('.'))
-  .pipe(gulp.dest(path.join(DIST_DIR, 'css')))
+  .pipe(gulp.dest(path.join(DIST_SITE_DIR, 'css')))
   ;
 });
 
@@ -88,7 +90,7 @@ gulp.task('app:js', () => {
   .src(path.join(SRC_DIR, '*.js'))
   .pipe(named())
   .pipe(webpack(require('./webpack.config.js')))
-  .pipe(gulp.dest(path.join(DIST_DIR, 'js')))
+  .pipe(gulp.dest(path.join(DIST_SITE_DIR, 'js')))
   ;
 });
 
@@ -104,7 +106,7 @@ gulp.task('document:js', () => {
   return gulp
   .src(path.join(SRC_DIR, '**', '*.js'))
   .pipe(documentation('html'))
-  .pipe(gulp.dest(path.join(DIST_DIR, 'docs')))
+  .pipe(gulp.dest(path.join(DIST_SITE_DIR, 'docs')))
   ;
 });
 
@@ -116,7 +118,7 @@ gulp.task('server:app', [ 'server:localdev:storage' ], () => {
   gulp.watch(path.join(SRC_DIR, '**', '*.js'), [ 'app:js' ]);
 
   return gulp
-  .src(DIST_DIR)
+  .src(DIST_SITE_DIR)
   .pipe(webserver({
     livereload: true,
     open: true,
@@ -160,7 +162,7 @@ gulp.task('test:e2e', () => {
     },
     reporter: 'mochawesome',
     reporterOptions: {
-      reportDir: path.join(DIST_DIR, 'e2e-tests'),
+      reportDir: path.join(DIST_SITE_DIR, 'e2e-tests'),
       reportName: 'index',
     },
   }))
@@ -177,7 +179,7 @@ gulp.task('test:lint', () => {
   .pipe(eslint.format('codeframe'))
   .pipe(eslint.format('html', result => {
     file('index.html', result, { src: true })
-    .pipe(gulp.dest(path.join(DIST_DIR, 'eslint')))
+    .pipe(gulp.dest(path.join(DIST_SITE_DIR, 'eslint')))
     ;
   }))
   .pipe(eslint.failAfterError())

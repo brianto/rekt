@@ -17,7 +17,7 @@ phases:
 
   post_build:
     commands:
-      - aws s3 sync dist s3://${REKT_WEBSITE_BUCKET}
+      - aws s3 sync dist/site s3://${REKT_WEBSITE_BUCKET}
 
 artifacts:
   discard-paths: no

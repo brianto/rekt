@@ -1,5 +1,7 @@
 const path = require('path');
 
+const DIST_DIR = path.join('dist', 'site');
+
 var webpack = require('./webpack.config.js');
 webpack.module.preLoaders = [
   {
@@ -49,13 +51,13 @@ module.exports = config => {
     },
 
     htmlReporter: {
-      outputFile: 'dist/unit-tests/index.html',
+      outputFile: path.join(DIST_DIR, 'unit-tests', 'index.html'),
       groupSuites: true,
       useCompactStyle: true,
     },
 
     coverageReporter: {
-      dir: 'dist',
+      dir: DIST_DIR,
       subdir: 'unit-coverage',
       reporters: [
         { type: 'html' },
