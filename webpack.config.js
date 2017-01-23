@@ -9,6 +9,10 @@ module.exports = {
     modulesDirectories: [ 'bower_components' ],
   },
   module: {
+    noParse: [
+      /\/qs\//,
+      /\/swagger-js\//,
+    ],
     loaders: [
       {
         test: /.js$/,
@@ -18,6 +22,7 @@ module.exports = {
       {
         test: /.js$/,
         loader : 'imports',
+        exclude: /(node_modules|bower_components)/,
         query: {
           'zepto': 'zepto',
         }
