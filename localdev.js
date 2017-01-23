@@ -15,6 +15,7 @@ const ARGV = minimist(process.argv.slice(2), {
     'dynamodb-port': 4567,
     'site-path': path.join('.', 'dist', 'site'),
     'api-path': path.join('.', 'dist', 'localdev'),
+    'sample-code-path': path.join('.', 'api', 'localdev', 'sample-code'),
     'stack': path.join('.', 'stack.yml'),
   },
 });
@@ -46,6 +47,7 @@ swagger.create({
 
   app.use(livereload());
   app.use(serveStatic(ARGV['site-path']));
+  app.use(serveStatic(ARGV['sample-code-path']));
 
   swagger.register(app);
 
