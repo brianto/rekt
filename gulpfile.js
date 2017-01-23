@@ -22,7 +22,6 @@ const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
 const webpack = require('webpack-stream');
-const webserver = require('gulp-webserver');
 const yaml = require('gulp-yaml');
 
 const config = {
@@ -153,7 +152,8 @@ gulp.task('localdev:compile', () => {
   return gulp
   .src([
     'localdev.js',
-    path.join(API_DIR, '**', '*.js'),
+    path.join(API_DIR, 'aws', '**', '*.js'),
+    path.join(API_DIR, 'localdev', '**', '*.js'),
     path.join('!**', '*.spec.js'),
   ])
   .pipe(babel())
@@ -172,38 +172,25 @@ gulp.task('localdev', [
   'localdev:assets',
   'localdev:compile',
 ], () => {
+  gulp.watch(path.join(SRC_DIR, '**', '*.html.hbs'), [ 'app:html' ]);
+  gulp.watch(path.join(SRC_DIR, '**', '*.less'), [ 'app:css' ]);
+  gulp.watch(path.join(SRC_DIR, '**', '*.js'), [ 'app:js' ]);
+
+  gulp.watch(path.join(API_DIR, '*.yml.hbs'), [ 'api:definition' ]);
+
+  gulp.watch(path.join(API_DIR, 'localdev', '*.yml'), [ 'localdev:assets' ]);
+  gulp.watch([
+    'localdev.js',
+    path.join(API_DIR, '**', '*.js'),
+    path.join('!**', '*.spec.js'),
+  ], [ 'localdev:compile' ]);
+
   return gls.new([
     path.join(DIST_LOCALDEV_DIR, 'localdev.js'),
     `--server-port=${LOCALDEV_SERVER_PORT}`,
   ])
   .start();
 });
-
-gulp.task('server:app', [ 'server:localdev:storage' ], () => {
-  gulp.watch(path.join(SRC_DIR, '**', '*.html.hbs'), [ 'app:html' ]);
-  gulp.watch(path.join(SRC_DIR, '**', '*.less'), [ 'app:css' ]);
-  gulp.watch(path.join(SRC_DIR, '**', '*.js'), [ 'app:js' ]);
-
-  return gulp
-  .src(DIST_SITE_DIR)
-  .pipe(webserver({
-    livereload: true,
-    open: true,
-  }))
-  ;
-});
-
-gulp.task('server:localdev:storage', [ 'server:localdev:dynamodb' ], () => {
-  const server = gls.new('localdev/storage.js');
-  server.start();
-});
-
-gulp.task('server:localdev:dynamodb', () => {
-  const PORT = 4567;
-  dynamo.launch(PORT, null, [ '-sharedDb' ]);
-});
-
-gulp.task('server', [ 'server:app' ]);
 
 gulp.task('test:unit', done => {
   new karma.Server({
@@ -255,14 +242,5 @@ gulp.task('test:lint', () => {
 
 gulp.task('test', [ 'test:unit', 'test:e2e', 'test:lint' ]);
 
-gulp.task('default', [ 'build', 'server' ]);
+gulp.task('default', [ 'build', 'localdev' ]);
 
-gulp.task('dynamodb', () => {
-  const PORT = 4567;
-
-  dynamo.launch(PORT, null, [ '-sharedDb' ]);
-
-  // Launch resolving the promise doesn't guarantee the local dynamodb service
-  // will be running. 1s wait is close enough.
-  setTimeout(() => open(`http://localhost:${PORT}/shell`), 1000);
-});
