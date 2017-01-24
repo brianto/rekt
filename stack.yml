@@ -137,10 +137,8 @@ Resources:
         Statement:
           - Effect: Allow
             Principal: "*"
-            Action:
-              - s3:GetObject
-            Resource:
-              - !Sub arn:aws:s3:::${website}/*
+            Action: s3:GetObject
+            Resource: !Sub arn:aws:s3:::${website}/*
 
   build:
     Type: AWS::CodeBuild::Project
@@ -180,20 +178,18 @@ Resources:
         - arn:aws:iam::aws:policy/AWSCodePipelineFullAccess
         - arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess
       Policies:
-        - PolicyName: CodeBuildServiceRolePolicy
+        - PolicyName: !Sub ${AWS::StackName}-deployer
           PolicyDocument:
             Version: 2012-10-17
             Statement:
               - Effect: Allow
-                Resource:
-                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${AWS::StackName}:*
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${AWS::StackName}:*
                 Action:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
               - Effect: Allow
-                Resource:
-                  - !Sub arn:aws:s3:::${AWS::StackName}-*
+                Resource: !Sub arn:aws:s3:::${AWS::StackName}-*
                 Action:
                   - s3:PutObject
                   - s3:GetObject
