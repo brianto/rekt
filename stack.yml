@@ -1,4 +1,8 @@
 ---
+# Validate this template with
+#
+#   aws cloudformation validate-template --template-body "file://$(pwd)/stack.yml"
+
 AWSTemplateFormatVersion: 2010-09-09
 
 Parameters:
@@ -44,13 +48,13 @@ Metadata:
 
 Outputs:
 
-  site:
+  RektWebsiteURL:
     Description: Website URL
-    Value: !GetAtt artifacts.WebsiteURL
+    Value: !GetAtt WebsiteBucket.WebsiteURL
 
 Resources:
 
-  reviews:
+  ReviewsTable:
     Type: AWS::DynamoDB::Table
     Properties:
       KeySchema:
@@ -68,7 +72,7 @@ Resources:
         WriteCapacityUnits: 2
       # TODO maybe add GSI for monthly queries
 
-  comments:
+  CommentsTable:
     Type: AWS::DynamoDB::Table
     Properties:
       KeySchema:
@@ -85,7 +89,7 @@ Resources:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
 
-  api:
+  Api:
     Type: AWS::ApiGateway::RestApi
     Properties:
       Name: !Ref AWS::StackName
@@ -93,58 +97,58 @@ Resources:
 
   # TODO use swagger definition
   # TODO use mock for now
-  get:
+  MockGetMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      RestApiId: !Ref api
-      ResourceId: !GetAtt api.RootResourceId
+      RestApiId: !Ref Api
+      ResourceId: !GetAtt Api.RootResourceId
       HttpMethod: GET
       AuthorizationType: NONE
       Integration:
         Type: MOCK
 
-  deployment:
+  ApiDeployment:
     Type: AWS::ApiGateway::Deployment
     Properties:
-      RestApiId: !Ref api
+      RestApiId: !Ref Api
     DependsOn:
-      - get
+      - MockGetMethod
 
-  stage:
+  ApiStage:
     Type: AWS::ApiGateway::Stage
     Properties:
-      StageName: production
-      RestApiId: !Ref api
-      DeploymentId: !Ref deployment
+      StageName: api
+      RestApiId: !Ref Api
+      DeploymentId: !Ref ApiDeployment
 
-  artifacts:
+  PipelineArtifactsBucket:
     Type: AWS::S3::Bucket
     Properties: {}
 
-  website:
+  WebsiteBucket:
     Type: AWS::S3::Bucket
     Properties:
       AccessControl: PublicRead
       WebsiteConfiguration:
         IndexDocument: index.html
 
-  public:
+  WebsiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref website
+      Bucket: !Ref WebsiteBucket
       PolicyDocument:
         Version: 2012-10-17
         Statement:
           - Effect: Allow
             Principal: "*"
             Action: s3:GetObject
-            Resource: !Sub arn:aws:s3:::${website}/*
+            Resource: !Sub arn:aws:s3:::${WebsiteBucket}/*
 
-  build:
+  Build:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: !Ref AWS::StackName
-      ServiceRole: !Ref deployer
+      ServiceRole: !Ref DeployerRole
       Source:
         Type: CODEPIPELINE
       Artifacts:
@@ -155,15 +159,14 @@ Resources:
         Image: aws/codebuild/nodejs:7.0.0
         EnvironmentVariables:
           - Name: REKT_API_GATEWAY_ENDPOINT
-            Value: !Sub https://${api}.execute-api.${AWS::Region}.amazonaws.com/${stage}
+            Value: !Sub https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${ApiStage}
           - Name: REKT_WEBSITE_BUCKET
-            Value: !Ref website
+            Value: !Ref WebsiteBucket
       TimeoutInMinutes: 30
 
-  deployer:
+  DeployerRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AWS::StackName}-deployer
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -195,15 +198,15 @@ Resources:
                   - s3:GetObject
                   - s3:GetObjectVersion
 
-  pipeline:
+  Pipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
       Name: !Ref AWS::StackName
-      RoleArn: !GetAtt deployer.Arn
+      RoleArn: !GetAtt DeployerRole.Arn
       RestartExecutionOnUpdate: Yes
       ArtifactStore:
         Type: S3
-        Location: !Ref artifacts
+        Location: !Ref PipelineArtifactsBucket
       Stages:
 
         - Name: Source
@@ -231,7 +234,7 @@ Resources:
                 Provider: CodeBuild
                 Version: 1
               Configuration:
-                ProjectName: !Ref build
+                ProjectName: !Ref Build
               InputArtifacts:
                 - Name: !Sub ${AWS::StackName}-source
               OutputArtifacts:
