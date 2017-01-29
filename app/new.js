@@ -1,5 +1,5 @@
 import { OriginFactory } from './lib/OriginFactory';
-import { Storage } from './lib/Storage';
+import { ServiceGateway } from './lib/ServiceGateway';
 
 import Prism from './lib/Prism';
 
@@ -7,7 +7,7 @@ class FormPreview {
 
   constructor({
     container, description, files, render, preview, source, submit, submitter, title,
-    initialize = true, storage = new Storage({}), origins = new OriginFactory(),
+    initialize = true, service = new ServiceGateway(), origins = new OriginFactory(),
   }) {
     this.container = container;
     this.description = description;
@@ -19,7 +19,7 @@ class FormPreview {
     this.submitter = submitter;
     this.title = title;
 
-    this.storage = storage;
+    this.service = service;
     this.origins = origins;
 
     if (initialize) {
@@ -68,11 +68,13 @@ class FormPreview {
   }
 
   onSubmit(event) {
-    return this.storage.createReview({
-      title: this.title.val(),
-      description: this.description.val(),
-      url: this.source.val(),
-      submitter: this.submitter.val(),
+    return this.service.createReview({
+      body: {
+        title: this.title.val(),
+        description: this.description.val(),
+        url: this.source.val(),
+        submitter: this.submitter.val(),
+      },
     })
     .then(response => this.onReviewCreated(response))
     .catch((xhr, type, error) => this.onReviewFail(xhr, type, error))
