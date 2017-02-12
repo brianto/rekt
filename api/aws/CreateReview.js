@@ -24,7 +24,6 @@ export class CreateReview {
   }
 
   handle(params) {
-    console.log(params);
     const item = this.itemFrom(params);
 
     return this.client.put({
@@ -38,12 +37,10 @@ export class CreateReview {
   static handler(event, context, callback) {
     AWS.config.update({
       region: process.env.AWS_REGION,
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     });
 
     new CreateReview(AWS, process.env.REKT_REVIEWS_TABLE)
-    .handle(params)
+    .handle(event)
     .then(item => callback(null, item))
     .catch(err => callback(err))
     ;
