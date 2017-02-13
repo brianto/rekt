@@ -173,12 +173,11 @@ Resources:
         Version: 2012-10-17
         Statement:
           - Effect: Allow
+            Action: sts:AssumeRole
             Principal:
               Service:
                 - codebuild.amazonaws.com
                 - codepipeline.amazonaws.com
-            Action:
-              - sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSCodePipelineFullAccess
         - arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess
@@ -199,6 +198,12 @@ Resources:
                   - s3:PutObject
                   - s3:GetObject
                   - s3:GetObjectVersion
+              - Effect: Allow
+                Resource: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}-*
+                Action: lambda:UpdateFunctionCode
+              - Effect: Allow
+                Resource: !Sub arn:aws:apigateway:${AWS::Region}::/restapis/${Api}
+                Action: apigateway:PUT
 
   ServicerRole:
     Type: AWS::IAM::Role
@@ -207,12 +212,9 @@ Resources:
         Version: 2012-10-17
         Statement:
           - Effect: Allow
+            Action: sts:AssumeRole
             Principal:
-              Service:
-                - apigateway.amazonaws.com
-                - lambda.amazonaws.com
-            Action:
-              - sts:AssumeRole
+              Service: apigateway.amazonaws.com
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
@@ -221,9 +223,10 @@ Resources:
             Version: 2012-10-17
             Statement:
               - Effect: Allow
-                Resource:
-                  - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${ReviewsTable}
-                  - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${CommentsTable}
+                Action: lambda:InvokeFunction
+                Resource: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}-*
+              - Effect: Allow
+                Resource: !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${AWS::StackName}-*
                 Action:
                   - dynamodb:Query
                   - dynamodb:GetItem
