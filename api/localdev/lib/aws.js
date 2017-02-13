@@ -1,6 +1,5 @@
 import AWS from 'aws-sdk';
 
-AWS.config.setPromisesDependency(Promise);
 AWS.config.update({
   // Keys unused, but required
   // Region doesn't matter, used only for naming
