@@ -154,6 +154,8 @@ Resources:
         Type: LINUX_CONTAINER
         Image: aws/codebuild/nodejs:7.0.0
         EnvironmentVariables:
+          - Name: REKT_API_NAME
+            Value: !Ref AWS::StackName
           - Name: REKT_API_ID
             Value: !Ref Api
           - Name: REKT_API_GATEWAY_ENDPOINT
