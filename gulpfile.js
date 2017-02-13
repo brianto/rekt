@@ -23,6 +23,7 @@ const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
 const webpack = require('webpack-stream');
 const yaml = require('gulp-yaml');
+const zip = require('gulp-zip');
 
 const config = {
   node: require('./package.json'),
@@ -33,12 +34,12 @@ const LOCALDEV_SERVER_PORT = 8000;
 
 const SRC_DIR = 'app';
 const API_DIR = 'api';
+const AWS_LAMBDA_API_GATEWAY_ZIP = 'lambda-api-gateway.zip';
 
 const DIST_DIR = 'dist';
 const DIST_SITE_DIR = path.join(DIST_DIR, 'site');
 const DIST_LOCALDEV_DIR = path.join(DIST_DIR, 'localdev');
 const DIST_AWS_DIR = path.join(DIST_DIR, 'aws');
-const DIST_AWS_LAMBDA_API_GATEWAY_DIR = path.join(DIST_AWS_DIR, 'lambda-api-gateway');
 
 gulp.task('clean', () => {
   return del([ DIST_DIR ]);
@@ -96,16 +97,33 @@ gulp.task('app:js', () => {
   return gulp
   .src(path.join(SRC_DIR, '*.js'))
   .pipe(named())
-  .pipe(webpack(require('./webpack.config.js')))
+  .pipe(webpack(require('./browser.webpack.config.js')))
   .pipe(gulp.dest(path.join(DIST_SITE_DIR, 'js')))
   ;
 });
 
 gulp.task('api:definition', () => {
+  function environment(key, defaultValue) {
+    const value = process.env[key];
+    return value == null ? defaultValue : value;
+  }
+
+  function apiGatewayUriFor(lambdaArn) {
+    const region = environment('AWS_REGION', 'xx-localdev-1');
+    const path = [ 'path', '2015-03-31', 'functions', lambdaArn, 'invocations' ].join('/');
+    return [ 'arn', 'aws', 'apigateway', region , 'lambda', path ].join(':');
+  }
+
   return gulp
   .src(path.join(API_DIR, '*.yml.hbs'))
   .pipe(handlebars({
-    host: process.env.REKT_API_GATEWAY_ENDPOINT || `localhost:${LOCALDEV_SERVER_PORT}`,
+    Endpoint: environment('REKT_API_GATEWAY_ENDPOINT', `localhost:${LOCALDEV_SERVER_PORT}`),
+    ServicerArn: environment('REKT_SERVICER_ARN', 'localdev-servicer'),
+    CreateReviewLambdaUri: apiGatewayUriFor(environment('REKT_CREATE_REVIEW_LAMBDA_ARN', 'localdev-create-review')),
+  }, {
+    compile: {
+      strict: true,
+    }
   }))
   .pipe(rename(path => path.extname = ''))
   .pipe(gulp.dest(DIST_SITE_DIR))
@@ -123,8 +141,10 @@ gulp.task('api:functions', () => {
     path.join(API_DIR, 'aws', '**', '*.js'),
     path.join('!**', '*.spec.js'),
   ])
-  .pipe(babel())
-  .pipe(gulp.dest(DIST_AWS_LAMBDA_API_GATEWAY_DIR))
+  .pipe(named())
+  .pipe(webpack(require('./aws-lambda.webpack.config.js')))
+  .pipe(zip(AWS_LAMBDA_API_GATEWAY_ZIP))
+  .pipe(gulp.dest(DIST_AWS_DIR))
   ;
 });
 

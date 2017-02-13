@@ -2,7 +2,7 @@ const path = require('path');
 
 const DIST_DIR = path.join('dist', 'site');
 
-var webpack = require('./webpack.config.js');
+var webpack = require('./browser.webpack.config.js');
 webpack.module.preLoaders = [
   {
     test: /\.js$/,

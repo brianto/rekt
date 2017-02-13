@@ -7,7 +7,7 @@ info:
   title: Rekt
   description: Rekt Internal API
 
-host: {{ host }}
+host: {{ Endpoint }}
 
 schemes:
   - http
@@ -37,7 +37,15 @@ paths:
           description: Review Created
           schema:
             $ref: '#/definitions/Review'
-
+      x-amazon-apigateway-integration:
+        type: aws
+        httpMethod: POST
+        credentials: {{ ServicerArn }}
+        uri: {{ CreateReviewLambdaUri }}
+        passthroughBehavior: when_no_templates
+        responses:
+          default:
+            statusCode: 201
 definitions:
   CreateReviewRequest:
     title: Create Review Request
