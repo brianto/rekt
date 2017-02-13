@@ -119,6 +119,7 @@ gulp.task('api:definition', () => {
   .pipe(handlebars({
     Name: environment('REKT_API_NAME', 'Rekt'),
     Endpoint: environment('REKT_API_GATEWAY_ENDPOINT', `localhost:${LOCALDEV_SERVER_PORT}`),
+    Stage: environment('REKT_API_GATEWAY_STAGE', ''),
     ServicerArn: environment('REKT_SERVICER_ARN', 'localdev-servicer'),
     CreateReviewLambdaUri: apiGatewayUriFor(environment('REKT_CREATE_REVIEW_LAMBDA_ARN', 'localdev-create-review')),
   }, {

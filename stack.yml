@@ -159,7 +159,9 @@ Resources:
           - Name: REKT_API_ID
             Value: !Ref Api
           - Name: REKT_API_GATEWAY_ENDPOINT
-            Value: !Sub https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${ApiStage}
+            Value: !Sub ${Api}.execute-api.${AWS::Region}.amazonaws.com
+          - Name: REKT_API_GATEWAY_STAGE
+            Value: !Ref ApiStage
           - Name: REKT_WEBSITE_BUCKET
             Value: !Ref WebsiteBucket
           - Name: REKT_SERVICER_ARN
