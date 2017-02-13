@@ -17,7 +17,13 @@ phases:
 
   post_build:
     commands:
-      - aws s3 sync dist/site s3://${REKT_WEBSITE_BUCKET}
+      # Update Api
+      - aws lambda update-function-code --function-name "${REKT_CREATE_REVIEW_LAMBDA_ARN}" --zip-file "fileb://$(pwd)/dist/aws/lambda-api-gateway.zip"
+      - aws apigateway put-rest-api --fail-on-warnings --mode overwrite --rest-api-id "${REKT_API_ID}" --body "file://$(pwd)/dist/site/swagger.yml"
+      # TODO deploy api
+
+      # Update Website
+      - aws s3 sync dist/site "s3://${REKT_WEBSITE_BUCKET}"
 
 artifacts:
   discard-paths: no

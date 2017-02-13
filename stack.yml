@@ -85,14 +85,14 @@ Resources:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
 
+  # API is populated on first (CodePipeline) build
+  # This is only a placeholder until then
   Api:
     Type: AWS::ApiGateway::RestApi
     Properties:
       Name: !Ref AWS::StackName
       Description: Backend API
 
-  # TODO use swagger definition
-  # TODO use mock for now
   MockGetMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -154,10 +154,16 @@ Resources:
         Type: LINUX_CONTAINER
         Image: aws/codebuild/nodejs:7.0.0
         EnvironmentVariables:
+          - Name: REKT_API_ID
+            Value: !Ref Api
           - Name: REKT_API_GATEWAY_ENDPOINT
             Value: !Sub https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${ApiStage}
           - Name: REKT_WEBSITE_BUCKET
             Value: !Ref WebsiteBucket
+          - Name: REKT_SERVICER_ARN
+            Value: !GetAtt ServicerRole.Arn
+          - Name: REKT_CREATE_REVIEW_LAMBDA_ARN
+            Value: !GetAtt CreateReviewLambda.Arn
       TimeoutInMinutes: 30
 
   DeployerRole:
@@ -193,6 +199,47 @@ Resources:
                   - s3:PutObject
                   - s3:GetObject
                   - s3:GetObjectVersion
+
+  ServicerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - apigateway.amazonaws.com
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: !Sub ${AWS::StackName}-servicer
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Resource:
+                  - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${ReviewsTable}
+                  - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${CommentsTable}
+                Action:
+                  - dynamodb:Query
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+
+  CreateReviewLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: nodejs4.3
+      Role: !GetAtt ServicerRole.Arn
+      Handler: CreateReview.handler
+      Environment:
+        Variables:
+          REKT_REVIEWS_TABLE: !Ref ReviewsTable
+      Code:
+        ZipFile: // Not Implemented
 
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
