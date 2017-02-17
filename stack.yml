@@ -218,7 +218,9 @@ Resources:
           - Effect: Allow
             Action: sts:AssumeRole
             Principal:
-              Service: apigateway.amazonaws.com
+              Service:
+                - lambda.amazonaws.com
+                - apigateway.amazonaws.com
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
