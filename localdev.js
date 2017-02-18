@@ -38,13 +38,6 @@ swagger.create({
     throw err;
   }
 
-  app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    next();
-  });
-
   app.use(livereload());
   app.use(serveStatic(ARGV['site-path']));
   app.use(serveStatic(ARGV['sample-code-path']));

@@ -17,7 +17,6 @@ swagger:
 
     swagger_controllers:
       - swagger_params_parser
-      - cors
       - swagger_security
       - _swagger_validate
       - express_compatibility
