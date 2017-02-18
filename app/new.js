@@ -76,7 +76,7 @@ class FormPreview {
         submitter: this.submitter.val(),
       },
     })
-    .then(response => this.onReviewCreated(response))
+    .then(response => this.onReviewCreated(response.obj))
     .catch((xhr, type, error) => this.onReviewFail(xhr, type, error))
     ;
   }
