@@ -1,4 +1,4 @@
-import { Storage } from './lib/Storage';
+import { ServiceGateway } from './lib/ServiceGateway';
 import { OriginFactory } from './lib/OriginFactory';
 
 import qs from 'qs';
@@ -9,14 +9,14 @@ class CodeReview {
 
   constructor({
     title, description, submitter, timestamp,
-    initialize = true, storage = new Storage({}), origins = new OriginFactory(),
+    initialize = true, service = new ServiceGateway(), origins = new OriginFactory(),
   }) {
     this.title = title;
     this.description = description;
     this.submitter = submitter;
     this.timestamp = timestamp;
 
-    this.storage = storage;
+    this.service = service;
     this.origins = origins;
 
     this.query = {};
@@ -43,8 +43,8 @@ class CodeReview {
   }
 
   loadReview(id) {
-    return this.storage
-    .review(id)
+    return this.service
+    .getReview({ id: id })
     .then(review => {
       this.renderMetadata(review);
       this.renderCode(review);
