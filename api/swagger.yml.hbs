@@ -23,6 +23,7 @@ produces:
 paths:
   /reviews:
     x-swagger-router-controller: controller
+
     post:
       description: Creates a new review
       operationId: createReview
@@ -38,6 +39,10 @@ paths:
           description: Review Created
           schema:
             $ref: '#/definitions/Review'
+          headers:
+            Access-Control-Allow-Headers: { type: string }
+            Access-Control-Allow-Methods: { type: string }
+            Access-Control-Allow-Origin:  { type: string }
       x-amazon-apigateway-integration:
         type: aws
         httpMethod: POST
@@ -47,6 +52,32 @@ paths:
         responses:
           default:
             statusCode: 201
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+    options:
+      description: CORS Support
+      responses:
+        200:
+          description: CORS Configuration
+          headers:
+            Access-Control-Allow-Headers: { type: string }
+            Access-Control-Allow-Methods: { type: string }
+            Access-Control-Allow-Origin:  { type: string }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: '{ "statusCode": 200 }'
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
 definitions:
   CreateReviewRequest:
     title: Create Review Request
@@ -96,3 +127,4 @@ definitions:
       submitter:
         type: string
         description: Review author
+
