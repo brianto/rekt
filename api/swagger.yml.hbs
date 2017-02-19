@@ -21,6 +21,7 @@ produces:
   - application/json
 
 paths:
+
   /reviews:
     x-swagger-router-controller: controller
 
@@ -59,6 +60,67 @@ paths:
 
     options:
       description: CORS Support
+      responses:
+        200:
+          description: CORS Configuration
+          headers:
+            Access-Control-Allow-Headers: { type: string }
+            Access-Control-Allow-Methods: { type: string }
+            Access-Control-Allow-Origin:  { type: string }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: '{ "statusCode": 200 }'
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+  /reviews/{id}:
+    x-swagger-router-controller: controller
+
+    get:
+      description: Gets a review
+      operationId: getReview
+      parameters:
+        - name: id
+          description: Review UUID
+          in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: Review Fetched
+          schema:
+            $ref: '#/definitions/Review'
+          headers:
+            Access-Control-Allow-Headers: { type: string }
+            Access-Control-Allow-Methods: { type: string }
+            Access-Control-Allow-Origin:  { type: string }
+      x-amazon-apigateway-integration:
+        type: aws
+        httpMethod: POST
+        credentials: {{ ServicerArn }}
+        uri: {{ GetReviewLambdaUri }}
+        passthroughBehavior: when_no_templates
+        responses:
+          default:
+            statusCode: 200
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+
+    options:
+      description: CORS Support
+      parameters:
+        - name: id
+          in: path
+          type: string
+          required: true
       responses:
         200:
           description: CORS Configuration

@@ -168,6 +168,8 @@ Resources:
             Value: !GetAtt ServicerRole.Arn
           - Name: REKT_CREATE_REVIEW_LAMBDA_ARN
             Value: !GetAtt CreateReviewLambda.Arn
+          - Name: REKT_GET_REVIEW_LAMBDA_ARN
+            Value: !GetAtt GetReviewLambda.Arn
       TimeoutInMinutes: 30
 
   DeployerRole:
@@ -244,6 +246,18 @@ Resources:
       Runtime: nodejs4.3
       Role: !GetAtt ServicerRole.Arn
       Handler: CreateReview.handler
+      Environment:
+        Variables:
+          REKT_REVIEWS_TABLE: !Ref ReviewsTable
+      Code:
+        ZipFile: // Not Implemented
+
+  GetReviewLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: nodejs4.3
+      Role: !GetAtt ServicerRole.Arn
+      Handler: GetReview.handler
       Environment:
         Variables:
           REKT_REVIEWS_TABLE: !Ref ReviewsTable

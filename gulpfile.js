@@ -122,6 +122,7 @@ gulp.task('api:definition', () => {
     Stage: environment('REKT_API_GATEWAY_STAGE', ''),
     ServicerArn: environment('REKT_SERVICER_ARN', 'localdev-servicer'),
     CreateReviewLambdaUri: apiGatewayUriFor(environment('REKT_CREATE_REVIEW_LAMBDA_ARN', 'localdev-create-review')),
+    GetReviewLambdaUri: apiGatewayUriFor(environment('REKT_GET_REVIEW_LAMBDA_ARN', 'localdev-get-review')),
   }, {
     compile: {
       strict: true,
