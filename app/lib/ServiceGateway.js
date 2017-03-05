@@ -3,18 +3,30 @@ import SwaggerClient from 'swagger-js';
 export class ServiceGateway {
 
   constructor(client) {
+    this.api = {};
+
     if (client) {
-      this.client = client;
+      this._promise = Promise.resolve(client);
+      ServiceGateway.bootstrapSwaggerMethods(client, this.api);
     } else {
-      new SwaggerClient({
+      this._promise = new SwaggerClient({
         url: '/swagger.json',
         usePromise: true,
       })
       .then(client => {
-        this.client = client;
-        ServiceGateway.bootstrapSwaggerMethods(client, this);
+        ServiceGateway.bootstrapSwaggerMethods(client, this.api);
       });
     }
+  }
+
+  dispatch(method, ...args) {
+    return this._promise.then(() => {
+      if (method in this.api) {
+        return this.api[method](...args);
+      }
+
+      return Promise.reject(`No such method '${method}', only [${Object.keys(this.api)}] available`);
+    });
   }
 
   static bootstrapSwaggerMethods(client, target) {

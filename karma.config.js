@@ -29,9 +29,10 @@ module.exports = config => {
 
     frameworks: [
       'mocha',
+      'chai-as-promised',
+      'sinon-chai',
       'chai',
       'sinon',
-      'sinon-chai',
     ],
 
     reporters: [

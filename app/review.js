@@ -44,8 +44,8 @@ class CodeReview {
 
   loadReview(id) {
     return this.service
-    .getReview({ id: id })
-    .then(review => {
+    .dispatch('getReview', { id: id })
+    .then(({ obj: review }) => {
       this.renderMetadata(review);
       this.renderCode(review);
     });

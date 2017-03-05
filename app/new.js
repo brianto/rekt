@@ -68,7 +68,7 @@ class FormPreview {
   }
 
   onSubmit(event) {
-    return this.service.createReview({
+    return this.service.dispatch('createReview', {
       body: {
         title: this.title.val(),
         description: this.description.val(),
@@ -76,7 +76,7 @@ class FormPreview {
         submitter: this.submitter.val(),
       },
     })
-    .then(response => this.onReviewCreated(response.obj))
+    .then(({ obj: response }) => this.onReviewCreated(response))
     .catch((xhr, type, error) => this.onReviewFail(xhr, type, error))
     ;
   }
