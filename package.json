@@ -39,7 +39,7 @@
     "chai-as-promised": "~5",
     "cloudformation-js-yaml-schema": "^0.1.0",
     "del": "^2.2.2",
-    "dynamodb-local": "0.0.12",
+    "dynamodb-local": "~0.0",
     "express": "^4.14.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
