@@ -25,7 +25,12 @@ module.exports = {
         exclude: /(node_modules|bower_components)/,
         query: {
           'zepto': 'zepto',
-        }
+        },
+      },
+      {
+        test: /.html$/,
+        exclude: /(node_modules|bower_components)/,
+        loader : 'html',
       },
     ],
   },

@@ -18,6 +18,7 @@ const less = require('gulp-less');
 const mocha = require('gulp-mocha');
 const named = require('vinyl-named');
 const open = require('open');
+const plumber = require('gulp-plumber');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
@@ -96,6 +97,7 @@ gulp.task('app:css', () => {
 gulp.task('app:js', () => {
   return gulp
   .src(path.join(SRC_DIR, '*.js'))
+  .pipe(plumber())
   .pipe(named())
   .pipe(webpack(require('./browser.webpack.config.js')))
   .pipe(gulp.dest(path.join(DIST_SITE_DIR, 'js')))
