@@ -1,5 +1,6 @@
 import { ServiceGateway } from './lib/ServiceGateway';
 import { OriginFactory } from './lib/OriginFactory';
+import { SourceReviewer } from './lib/views/Source';
 
 import qs from 'qs';
 
@@ -8,13 +9,14 @@ const UUID = /[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}/;
 class CodeReview {
 
   constructor({
-    title, description, submitter, timestamp,
+    title, description, submitter, timestamp, sources,
     initialize = true, service = new ServiceGateway(), origins = new OriginFactory(),
   }) {
     this.title = title;
     this.description = description;
     this.submitter = submitter;
     this.timestamp = timestamp;
+    this.sources = sources;
 
     this.service = service;
     this.origins = origins;
@@ -67,7 +69,7 @@ class CodeReview {
   }
 
   renderSource(source) {
-    // TODO
+    const reviewer = new SourceReviewer(source, this.sources);
   }
 }
 
@@ -78,5 +80,6 @@ $($ => {
     description: container.find('#description'),
     submitter: container.find('#submitter'),
     timestamp: container.find('#timestamp'),
+    sources: container.find('#sources'),
   });
 });
