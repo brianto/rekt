@@ -17,11 +17,15 @@ phases:
 
   post_build:
     commands:
-      # Update Api
+      # Update Lambdas
       - aws lambda update-function-code --function-name "${REKT_CREATE_REVIEW_LAMBDA_ARN}" --zip-file "fileb://$(pwd)/dist/aws/lambda-api-gateway.zip"
       - aws lambda update-function-code --function-name "${REKT_GET_REVIEW_LAMBDA_ARN}" --zip-file "fileb://$(pwd)/dist/aws/lambda-api-gateway.zip"
+
+      # Update Api
       - aws apigateway put-rest-api --fail-on-warnings --mode overwrite --rest-api-id "${REKT_API_ID}" --body "file://$(pwd)/dist/site/swagger.yml"
-      # TODO deploy api
+
+      # Deploy Api
+      - aws apigateway create-deployment --rest-api-id "${REKT_API_ID}" --stage-name "${REKT_API_GATEWAY_STAGE}"
 
       # Update Website
       - aws s3 sync dist/site "s3://${REKT_WEBSITE_BUCKET}"

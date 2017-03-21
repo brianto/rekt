@@ -210,6 +210,9 @@ Resources:
               - Effect: Allow
                 Resource: !Sub arn:aws:apigateway:${AWS::Region}::/restapis/${Api}
                 Action: apigateway:PUT
+              - Effect: Allow
+                Resource: !Sub arn:aws:apigateway:${AWS::Region}::/restapis/${Api}/deployments
+                Action: apigateway:POST
 
   ServicerRole:
     Type: AWS::IAM::Role
