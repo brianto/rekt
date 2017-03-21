@@ -106,6 +106,9 @@ paths:
         credentials: {{ ServicerArn }}
         uri: {{ GetReviewLambdaUri }}
         passthroughBehavior: when_no_templates
+        requestTemplates:
+          application/json: |
+            { "id": "$input.params('id')" }
         responses:
           default:
             statusCode: 200
