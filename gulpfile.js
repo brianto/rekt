@@ -84,7 +84,7 @@ gulp.task('app:html', () => {
 
 gulp.task('app:css', () => {
   return gulp
-  .src(path.join(SRC_DIR, '*.less'))
+  .src(path.join(SRC_DIR, '**', '*.less'))
   .pipe(sourcemaps.init())
   .pipe(less())
   .pipe(cleancss())
